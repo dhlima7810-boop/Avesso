@@ -369,6 +369,81 @@
     } catch (e) {}
   }
 
+  // Ruido branco, gerado uma vez e reaproveitado. Tudo que e sopro, atrito,
+  // estilhaco ou mar sai daqui: oscilador puro nao faz vento.
+  var bufRuido = null;
+  function ruidoBuf() {
+    if (!ac) return null;
+    if (bufRuido && bufRuido.sampleRate === ac.sampleRate) return bufRuido;
+    var n = Math.floor(ac.sampleRate * 1.2), b = ac.createBuffer(1, n, ac.sampleRate);
+    var d = b.getChannelData(0), i;
+    for (i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    bufRuido = b;
+    return b;
+  }
+
+  // Um oscilador com envelope, e duas coisas que o `tom` nao tem: `vib`
+  // balanca a altura (fantasma, piao, bussola) e `trem` corta o volume em
+  // pulsos — e o corte que faz helice soar como helice.
+  function nota(o) {
+    if (!C.som || !ac || ac.state !== 'running') return;
+    try {
+      var t = ac.currentTime + (o.atraso || 0);
+      var dur = o.dur || 0.2, vol = o.vol || 0.055;
+      var osc = ac.createOscillator(), g = ac.createGain(), fim = g;
+      osc.type = o.tipo || 'triangle';
+      osc.frequency.setValueAtTime(o.f, t);
+      if (o.f2 && o.f2 !== o.f) osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.f2), t + dur);
+      if (o.vib) {
+        var lfo = ac.createOscillator(), lg = ac.createGain();
+        lfo.frequency.setValueAtTime(o.vibHz || 6, t);
+        if (o.vibHz2) lfo.frequency.linearRampToValueAtTime(o.vibHz2, t + dur);
+        lg.gain.value = o.vib;
+        lfo.connect(lg); lg.connect(osc.frequency);
+        lfo.start(t); lfo.stop(t + dur + 0.05);
+      }
+      var ata = o.ataque === undefined ? 0.008 : o.ataque;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + ata);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      if (o.trem) {
+        var tg = ac.createGain(), tl = ac.createOscillator(), ta = ac.createGain();
+        tg.gain.value = 1 - o.trem;
+        tl.type = 'sine';
+        tl.frequency.setValueAtTime(o.tremHz || 12, t);
+        if (o.tremHz2) tl.frequency.linearRampToValueAtTime(o.tremHz2, t + dur);
+        ta.gain.value = o.trem;
+        tl.connect(ta); ta.connect(tg.gain);
+        tl.start(t); tl.stop(t + dur + 0.05);
+        g.connect(tg); fim = tg;
+      }
+      osc.connect(g);
+      fim.connect(ac.destination);
+      osc.start(t); osc.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+
+  // Ruido passado por um filtro que se abre ou se fecha ao longo do som.
+  function sopro(o) {
+    if (!C.som || !ac || ac.state !== 'running') return;
+    try {
+      var t = ac.currentTime + (o.atraso || 0);
+      var dur = o.dur || 0.3, vol = o.vol || 0.05;
+      var src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      src.buffer = ruidoBuf(); src.loop = true;
+      f.type = o.tipo || 'bandpass';
+      f.frequency.setValueAtTime(o.f, t);
+      if (o.f2 && o.f2 !== o.f) f.frequency.exponentialRampToValueAtTime(Math.max(20, o.f2), t + dur);
+      f.Q.value = o.q === undefined ? 1 : o.q;
+      var ata = o.ataque === undefined ? Math.min(0.06, dur * 0.35) : o.ataque;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + ata);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(g); g.connect(ac.destination);
+      src.start(t); src.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+
   var SONS = {
     virar:  function (cima) { tom(cima ? 300 : 190, cima ? 420 : 140, 0.06, 'square', 0.035); },
     rocada: function (n)    { tom(540 + n * 95, 540 + n * 95, 0.055, 'triangle', 0.055); },
@@ -383,6 +458,218 @@
     roupa:  function ()     { tom(523, 523, 0.14, 'triangle', 0.07);
                               window.setTimeout(function () { tom(659, 659, 0.14, 'triangle', 0.07); }, 120);
                               window.setTimeout(function () { tom(784, 784, 0.3, 'triangle', 0.07); }, 240); }
+  };
+
+  /* §4b — a voz de cada roupa -------------------------------------------- */
+  /* Vestir uma roupa abre o close dela; aqui ela tambem FALA. A voz sai do
+     nome: o Eco assombra, a Helice corta o ar, o Sopro so sopra. Onde o nome
+     nao sugere som nenhum, ela vem do movimento — ninguem precisa saber de
+     onde veio, so precisa sentir que a roupa tem corpo.
+
+     Tudo continua gerado por codigo: nenhum arquivo de audio entra aqui.
+     Duas regras seguram a tabela: ate 1.2s, porque o close fica 2.1s na
+     tela, e volume no mesmo teto dos outros sons, 0.07 — a voz apresenta,
+     nao anuncia. O atraso e do RELOGIO DO AUDIO (`atraso`), nao de
+     setTimeout: assim os golpes de uma mesma voz nao se espalham quando a
+     aba engasga. */
+
+  var VOZES = {
+    // Giro — meia volta para um lado, meia para o outro
+    avesso: function () {
+      nota({ f: 300, f2: 470, dur: 0.16, tipo: 'square', vol: 0.045 });
+      nota({ f: 470, f2: 240, dur: 0.24, tipo: 'square', vol: 0.038, atraso: 0.17 });
+    },
+    // Brasa — lenha estalando, cada estalo mais fraco, sobre um fundo quente
+    brasa: function () {
+      sopro({ f: 900, f2: 300, q: 1.2, dur: 0.09, vol: 0.06 });
+      sopro({ f: 1500, f2: 380, q: 1.4, dur: 0.07, vol: 0.045, atraso: 0.18 });
+      sopro({ f: 700, f2: 240, q: 1.1, dur: 0.13, vol: 0.034, atraso: 0.33 });
+      sopro({ f: 2200, f2: 800, q: 2, dur: 0.05, vol: 0.04, atraso: 0.45 });
+      // o fundo quente fica baixo de proposito: acima disto ele engole os
+      // estalos, e sem estalo nao ha lenha queimando
+      nota({ f: 120, f2: 72, dur: 0.55, tipo: 'sine', vol: 0.018, ataque: 0.05 });
+    },
+    // Prumo — o baque de um peso que para de uma vez
+    cal: function () {
+      nota({ f: 230, f2: 96, dur: 0.42, tipo: 'sine', vol: 0.07 });
+      nota({ f: 96, f2: 92, dur: 0.5, tipo: 'sine', vol: 0.03, atraso: 0.2, vib: 3, vibHz: 4 });
+    },
+    // Gema — mole: vibrato lento e uma queda curta
+    gema: function () {
+      nota({ f: 340, f2: 250, dur: 0.6, tipo: 'sine', vol: 0.055, vib: 26, vibHz: 4.2, ataque: 0.04 });
+    },
+    // Fuso — zunido que sobe girando
+    grafite: function () {
+      nota({ f: 180, f2: 620, dur: 0.75, tipo: 'sawtooth', vol: 0.038,
+             trem: 0.7, tremHz: 9, tremHz2: 26, ataque: 0.06 });
+    },
+    // Pulso — lub-dub
+    carmim: function () {
+      nota({ f: 110, f2: 62, dur: 0.17, tipo: 'sine', vol: 0.07 });
+      nota({ f: 96, f2: 55, dur: 0.22, tipo: 'sine', vol: 0.055, atraso: 0.23 });
+      nota({ f: 110, f2: 62, dur: 0.17, tipo: 'sine', vol: 0.045, atraso: 0.62 });
+    },
+    // Vaga — a onda que incha e esvazia
+    indigo: function () {
+      sopro({ f: 260, f2: 900, q: 0.8, dur: 0.5, vol: 0.055, ataque: 0.3 });
+      sopro({ f: 900, f2: 180, q: 0.9, dur: 0.6, vol: 0.05, ataque: 0.1, atraso: 0.5 });
+    },
+    // Rolha — plop, e o respingo
+    musgo: function () {
+      nota({ f: 900, f2: 120, dur: 0.07, tipo: 'sine', vol: 0.07 });
+      sopro({ f: 2600, f2: 900, q: 0.9, dur: 0.22, vol: 0.03, atraso: 0.06 });
+    },
+    // Piao — sobe rodando e bamboleia no fim
+    ambar: function () {
+      nota({ f: 240, f2: 430, dur: 0.8, tipo: 'triangle', vol: 0.05,
+             vib: 16, vibHz: 3, vibHz2: 13, ataque: 0.05 });
+    },
+    // Cometa — passa de uma vez, do agudo ao grave, com brilho por cima
+    duzentos: function () {
+      sopro({ f: 5200, f2: 220, q: 1.6, dur: 0.85, vol: 0.055, ataque: 0.12 });
+      nota({ f: 1800, f2: 420, dur: 0.75, tipo: 'sine', vol: 0.03, ataque: 0.1 });
+    },
+    // Estilhaco — rajada de estalos em tempos tortos
+    polvora: function () {
+      var q = [0, 0.05, 0.09, 0.17, 0.2, 0.31], i;
+      for (i = 0; i < q.length; i++) {
+        sopro({ f: 2200 + i * 900, f2: 900, q: 2.2, dur: 0.05,
+                vol: 0.055 - i * 0.006, atraso: q[i] });
+      }
+    },
+    // Roda — batidas de pedra acelerando
+    ferrugem: function () {
+      var q = [0, 0.2, 0.37, 0.51, 0.62, 0.7, 0.76], i;
+      for (i = 0; i < q.length; i++) {
+        nota({ f: 150, f2: 70, dur: 0.07, tipo: 'square', vol: 0.05, atraso: q[i] });
+      }
+    },
+    // Relogio — tique, taque, e o sininho
+    ocre: function () {
+      nota({ f: 1500, f2: 700, dur: 0.035, tipo: 'square', vol: 0.055 });
+      nota({ f: 1200, f2: 560, dur: 0.035, tipo: 'square', vol: 0.05, atraso: 0.33 });
+      nota({ f: 2093, f2: 2093, dur: 0.45, tipo: 'sine', vol: 0.035, atraso: 0.66 });
+    },
+    // Fole — abre e fecha duas vezes, chiando
+    menta: function () {
+      sopro({ f: 300, f2: 1400, q: 0.7, dur: 0.3, vol: 0.05, ataque: 0.18 });
+      sopro({ f: 1400, f2: 300, q: 0.7, dur: 0.3, vol: 0.045, atraso: 0.3 });
+      sopro({ f: 300, f2: 1100, q: 0.7, dur: 0.24, vol: 0.038, atraso: 0.62 });
+    },
+    // Helice — o corte das pas, acelerando
+    voo: function () {
+      nota({ f: 150, f2: 190, dur: 0.9, tipo: 'sawtooth', vol: 0.045,
+             trem: 0.95, tremHz: 11, tremHz2: 38, ataque: 0.08 });
+    },
+    // Bumerangue — vai e volta
+    pessego: function () {
+      nota({ f: 520, f2: 180, dur: 0.42, tipo: 'triangle', vol: 0.05, ataque: 0.03 });
+      nota({ f: 180, f2: 560, dur: 0.42, tipo: 'triangle', vol: 0.055, atraso: 0.42, ataque: 0.1 });
+    },
+    // Bussola — o pingo do metal e a agulha oscilando ate parar
+    cem: function () {
+      nota({ f: 1760, f2: 1740, dur: 0.5, tipo: 'sine', vol: 0.05 });
+      nota({ f: 880, f2: 870, dur: 0.75, tipo: 'sine', vol: 0.035,
+             vib: 9, vibHz: 7, vibHz2: 1.5, atraso: 0.08 });
+    },
+    // Sopro — so ar, sem nenhum tom
+    folego: function () {
+      sopro({ f: 420, f2: 1700, q: 0.6, dur: 0.45, vol: 0.05, ataque: 0.28 });
+      sopro({ f: 1700, f2: 320, q: 0.6, dur: 0.5, vol: 0.042, atraso: 0.45, ataque: 0.1 });
+    },
+    // Serra — aspero, cortado em dentes
+    giz: function () {
+      nota({ f: 220, f2: 260, dur: 0.75, tipo: 'sawtooth', vol: 0.04,
+             trem: 0.9, tremHz: 14, tremHz2: 9, ataque: 0.04 });
+      sopro({ f: 2400, f2: 1600, q: 1.1, dur: 0.7, vol: 0.022 });
+    },
+    // Lasca — o trinco seco da madeira
+    lasca: function () {
+      sopro({ f: 1800, f2: 420, q: 2.4, dur: 0.06, vol: 0.06 });
+      nota({ f: 260, f2: 130, dur: 0.18, tipo: 'square', vol: 0.04, atraso: 0.02 });
+    },
+    // Eco — o fantasma, e ele mesmo tres vezes mais longe. E a unica voz
+    // construida do movimento da roupa, e nao do nome.
+    breu: function () {
+      var v = [0.055, 0.034, 0.02, 0.011], i;
+      for (i = 0; i < v.length; i++) {
+        nota({ f: 430 - i * 42, f2: 300 - i * 30, dur: 0.5, tipo: 'sine',
+               vol: v[i], vib: 24, vibHz: 5.5, ataque: 0.08, atraso: i * 0.2 });
+      }
+    },
+    // Mola — o boing, quicando e perdendo forca
+    nespera: function () {
+      nota({ f: 620, f2: 190, dur: 0.5, tipo: 'triangle', vol: 0.06,
+             vib: 70, vibHz: 13, vibHz2: 4 });
+    },
+    // Ancora — o peso indo ao fundo, com a corrente
+    chumbo: function () {
+      nota({ f: 150, f2: 42, dur: 0.85, tipo: 'sine', vol: 0.07, ataque: 0.02 });
+      sopro({ f: 3200, f2: 2400, q: 3, dur: 0.05, vol: 0.035, atraso: 0.03 });
+      sopro({ f: 2800, f2: 2100, q: 3, dur: 0.05, vol: 0.028, atraso: 0.13 });
+      sopro({ f: 3000, f2: 2300, q: 3, dur: 0.05, vol: 0.02, atraso: 0.25 });
+    },
+    // Pluma — altissima e fraquissima, caindo devagar
+    lilas: function () {
+      sopro({ f: 5000, f2: 1400, q: 0.8, dur: 0.9, vol: 0.03, ataque: 0.35 });
+    },
+    // No — dois atritos de corda, um para cada lado
+    fio: function () {
+      sopro({ f: 800, f2: 2000, q: 1.6, dur: 0.16, vol: 0.045 });
+      sopro({ f: 2000, f2: 700, q: 1.6, dur: 0.18, vol: 0.042, atraso: 0.2 });
+    },
+    // Dado — tres cliques de madeira em tempos desiguais
+    fundo: function () {
+      nota({ f: 420, f2: 190, dur: 0.06, tipo: 'square', vol: 0.055 });
+      nota({ f: 360, f2: 160, dur: 0.06, tipo: 'square', vol: 0.05, atraso: 0.13 });
+      nota({ f: 300, f2: 140, dur: 0.1, tipo: 'square', vol: 0.045, atraso: 0.34 });
+    },
+    // Espelho — um pingo, e o mesmo pingo ao contrario
+    cegas: function () {
+      nota({ f: 1320, f2: 660, dur: 0.3, tipo: 'sine', vol: 0.05 });
+      nota({ f: 660, f2: 1320, dur: 0.3, tipo: 'sine', vol: 0.05, atraso: 0.32, ataque: 0.1 });
+    },
+    // Faisca — fritura curta, com dois estalinhos
+    estopim: function () {
+      sopro({ f: 6000, f2: 3000, q: 0.9, dur: 0.3, vol: 0.04 });
+      sopro({ f: 7000, f2: 4000, q: 3, dur: 0.03, vol: 0.05, atraso: 0.1 });
+      sopro({ f: 6400, f2: 3600, q: 3, dur: 0.03, vol: 0.045, atraso: 0.22 });
+    },
+    // Vulto — aparece e some sem nunca atacar
+    vidro: function () {
+      nota({ f: 196, f2: 196, dur: 1.0, tipo: 'sine', vol: 0.05, ataque: 0.45 });
+      nota({ f: 294, f2: 292, dur: 1.0, tipo: 'sine', vol: 0.03, ataque: 0.5, atraso: 0.08 });
+    },
+    // Ima — o zumbido que puxa, e a limalha grudando no fim. Os tiques sao
+    // o que separa a voz dele da Helice: as duas eram zumbido com corte, e
+    // a medida de assinatura nao distinguia uma da outra.
+    limalha: function () {
+      nota({ f: 55, f2: 104, dur: 0.85, tipo: 'square', vol: 0.045, ataque: 0.14 });
+      nota({ f: 110, f2: 208, dur: 0.85, tipo: 'sine', vol: 0.03, ataque: 0.2 });
+      sopro({ f: 4200, f2: 3000, q: 4, dur: 0.03, vol: 0.045, atraso: 0.6 });
+      sopro({ f: 3600, f2: 2600, q: 4, dur: 0.03, vol: 0.04, atraso: 0.68 });
+      sopro({ f: 5000, f2: 3400, q: 4, dur: 0.03, vol: 0.035, atraso: 0.73 });
+    },
+    // Avesso — a coroa: dois tons se cruzando, um brilho por cima, e o
+    // mesmo clique de quando a tela inverte. Ela leva o nome do jogo.
+    oavesso: function () {
+      nota({ f: 196, f2: 784, dur: 0.8, tipo: 'triangle', vol: 0.045, ataque: 0.05 });
+      nota({ f: 784, f2: 196, dur: 0.8, tipo: 'triangle', vol: 0.04, ataque: 0.05 });
+      nota({ f: 1175, f2: 1175, dur: 0.45, tipo: 'sine', vol: 0.03,
+             vib: 14, vibHz: 7, atraso: 0.45, ataque: 0.1 });
+      tom(300, 420, 0.06, 'square', 0.035);
+    }
+  };
+
+  // Nenhuma roupa nasce muda: sem entrada na tabela, a voz sai da propria
+  // cor — mais clara, mais aguda. Serve de rede para qualquer roupa nova.
+  SONS.voz = function (id) {
+    var f = VOZES[id];
+    if (f) { f(); return; }
+    var p = porId[id];
+    var n = p ? parseInt(p.cor.slice(1), 16) : 0x808080;
+    var b = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+    nota({ f: 180 + b * 2.2, f2: 180 + b * 3.3, dur: 0.4, tipo: 'triangle', vol: 0.05 });
   };
 
   /* §5 — medida da tela -------------------------------------------------- */
@@ -1964,6 +2251,11 @@
 
   function mostrarClose(p) {
     closeP = p;
+    // Quem vai do menu direto para o vestiario nunca passou por um aperto
+    // que acordasse o audio, e a roupa abria o close muda. O clique que
+    // veste e o gesto que o navegador exige — entao e aqui que se acorda.
+    somAcordar();
+    SONS.voz(p.id);          // a roupa se apresenta de corpo E de voz
     el.closeNome.textContent = p.nome;
     el.closeDiz.textContent = p.diz || '';
     el.close.hidden = false;

@@ -329,6 +329,46 @@ tela, fazendo o próprio movimento, com o resto fora de foco, ao lado do nome e
 da frase que descreve o movimento. Trocar só a borda do cartão não conta o que
 a roupa é — e o movimento é justamente o que a diferencia.
 
+### E cada roupa tem uma voz
+
+As 31 **soam** quando são vestidas, e o som sai do nome: o Eco assombra, a
+Hélice corta o ar, o Sopro só sopra, o Relógio faz tique-taque, a Rolha dá um
+plop. Onde o nome não sugere som nenhum, a voz vem do movimento — ninguém
+precisa saber de onde ela veio, só precisa sentir que a roupa tem corpo.
+
+**Nenhum arquivo de áudio entra no projeto.** Tudo é sintetizado na hora, com
+os mesmos três ajudantes do §4 do `jogo.js`:
+
+| | |
+|---|---|
+| `tom()` | o oscilador simples que já servia roçada, morte e meta |
+| `nota()` | oscilador com envelope, **vibrato** (balança a altura) e **tremolo** (corta o volume em pulsos) — é o corte do tremolo que faz hélice soar como hélice, e o vibrato que faz o Eco assombrar |
+| `sopro()` | ruído branco passado por um filtro que se abre ou se fecha ao longo do som — oscilador puro não faz vento, atrito nem estilhaço |
+
+Duas regras seguram a tabela `VOZES`: **até 1,2 s**, porque o close fica 2,1 s
+na tela, e **volume no mesmo teto dos outros sons, 0,07** — a voz apresenta,
+não anuncia.
+
+**Os golpes de uma voz são agendados no relógio do áudio** (`atraso`), não em
+`setTimeout`: assim os três estalos da Brasa não se espalham quando a aba
+engasga.
+
+**O close acorda o áudio.** Quem vai do menu direto para o vestiário nunca
+passou por um aperto que criasse o contexto, e a roupa abria o close muda. O
+clique que veste é o gesto que o navegador exige, então é ali que se acorda.
+
+**Nenhuma roupa nasce muda**: sem entrada em `VOZES`, a voz é derivada da cor
+da roupa — mais clara, mais aguda.
+
+Medido com um `OfflineAudioContext` no lugar do contexto de verdade: as 31
+soam, nenhuma passa do teto de volume nem de 1,2 s, e **nenhuma é
+indistinguível de outra** pela assinatura de envelope, de altura e de
+aspereza. Com a opção **Som** desligada, vestir uma roupa não cria nó de
+áudio nenhum; num navegador sem `AudioContext`, o close abre, veste e fecha
+igual.
+
+### Como o close se comporta
+
 Fecha sozinho em 2,1 s, ou num clique. Ele **recebe o ponteiro de propósito**:
 com `pointer-events:none` dava para clicar às cegas no armário por baixo do
 desfoque, e não havia como dispensá-lo a não ser esperando. E sair do
@@ -506,7 +546,7 @@ não depende de nada remoto, porque o GSAP viaja em `vendor/`.
 No menu, ao lado de **Inverter a tela** e **Som**, há um botão com uma
 interrogação que abre uma tela explicando o jogo inteiro: o botão, a
 inversão, **a roçada**, os três atos, os desafios, a marca do recorde, as 31
-roupas e as teclas.
+roupas (com a voz de cada uma) e as teclas.
 
 Ela existe porque o **dono do projeto jogou sem saber o que era roçar**. Se
 quem pediu a mecânica não entendeu jogando, ninguém ia entender.

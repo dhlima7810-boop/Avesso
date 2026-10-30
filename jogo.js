@@ -219,15 +219,24 @@
       alvos: [5, 8, 12], premios: [32, 68, 116], le: function (e) { return e.maxLimpo; } }
   ];
 
+  // As PROEZAS são metade do armário: as quatorze últimas roupas só saem
+  // daqui. As primeiras são de chegada, as últimas pedem domínio — é ali que
+  // ficam as roupas que valem a pena caçar.
   var PROEZAS = {
-    cem:      'Chegar a 200 m numa corrida',
-    duzentos: 'Chegar a 500 m numa corrida',
-    voo:      'Passar 10 obstáculos sem tocar no chão nem no teto',
-    fio:      'Levar a roçada até ×8',
-    fundo:    'Alcançar o Desabamento',
-    cegas:    'Fazer 100 m com a inversão da tela desligada',
-    folego:   'Ficar 30 segundos vivo numa corrida',
-    limalha:  'Roçar 20 vezes numa única corrida'
+    cem:       'Chegar a 200 m numa corrida',
+    folego:    'Ficar 30 segundos vivo numa corrida',
+    rente:     'Roçar 5 vezes bem rente numa corrida',
+    limpao:    'Passar 30 obstáculos seguidos sem roçar',
+    tres:      'Cumprir os três desafios numa mesma corrida',
+    maratona:  'Ficar 60 segundos vivo numa corrida',
+    voo25:     'Passar 25 obstáculos sem tocar no chão nem no teto',
+    voo:       'Passar 15 obstáculos sem tocar no chão nem no teto',
+    fio:       'Levar a roçada até ×8',
+    fundo:     'Alcançar o Desabamento',
+    cegas:     'Fazer 400 m com a inversão da tela desligada',
+    quatroMil: 'Passar dos 4.000 m numa corrida',
+    duzentos:  'Chegar a 1.500 m numa corrida',
+    limalha:   'Roçar 35 vezes numa única corrida'
   };
 
   /* §2 — estado ---------------------------------------------------------- */
@@ -244,7 +253,7 @@
     fFaixa: ATOS[0].fFaixa,
     setor: 0,
     escalaTempo: 1, virou: 0, segAntes: false, giro: 0, relogio: 0, cartoes: [],
-    mult: 0, bonus: 0, rocadas: 0, semTocar: 0,
+    mult: 0, bonus: 0, rocadas: 0, rentes: 0, semTocar: 0,
     maxMult: 0, maxSemTocar: 0, limpo: 0, maxLimpo: 0, passados: 0,
     desafios: [], premioDesafios: 0,
     passouRecorde: false, primeiro: true,
@@ -500,7 +509,7 @@
     C.vy = 0; C.inv = 0; C.tremor = 0; C.segurando = false;
     C.escalaTempo = 1; C.mult = 0; C.bonus = 0; C.rocadas = 0; C.semTocar = 0;
     C.passouRecorde = false; C.primeiro = true;
-    C.maxMult = 0; C.maxSemTocar = 0; C.limpo = 0; C.maxLimpo = 0;
+    C.maxMult = 0; C.maxSemTocar = 0; C.limpo = 0; C.maxLimpo = 0; C.rentes = 0;
     C.passados = 0; C.premioDesafios = 0;
   }
 
@@ -588,6 +597,7 @@
 
           C.bonus += val;
           C.rocadas++;
+          if (g.dmin <= A.rocadaRente) C.rentes++;   // as que pagam cheio
           C.limpo = 0;
           C.faiscas.push({ x: g.x + g.w, y: C.y, v: 1, n: val, q: q });
           SONS.rocada(C.mult + q * 3);
@@ -747,13 +757,25 @@
 
   function conferirProezas(m) {
     if (m >= 200) marcar('cem');
-    if (m >= 500) marcar('duzentos');
-    if (C.semTocar >= 10) marcar('voo');
+    if (C.tempo >= 30) marcar('folego');
+    if (C.rentes >= 5) marcar('rente');
+    if (C.maxLimpo >= 30) marcar('limpao');
+    if (C.tempo >= 60) marcar('maratona');
+    if (C.semTocar >= 25) marcar('voo25');
+    if (C.semTocar >= 15) marcar('voo');
     if (C.mult >= A.multMax) marcar('fio');
     if (C.setor >= 2) marcar('fundo');
-    if (!C.inverter && m >= 100) marcar('cegas');
-    if (C.tempo >= 30) marcar('folego');
-    if (C.rocadas >= 20) marcar('limalha');
+    if (!C.inverter && m >= 400) marcar('cegas');
+    if (m >= 4000) marcar('quatroMil');
+    if (m >= 1500) marcar('duzentos');
+    if (C.rocadas >= 35) marcar('limalha');
+
+    // os três desafios da mesma corrida
+    if (C.desafios.length === 3) {
+      var fe = 0;
+      for (var i = 0; i < 3; i++) if (C.desafios[i].feito) fe++;
+      if (fe === 3) marcar('tres');
+    }
   }
 
   function marcar(id) {

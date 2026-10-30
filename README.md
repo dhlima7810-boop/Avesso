@@ -215,11 +215,17 @@ de ser sobre conduzir para ser sobre escolher bem no armário.
 de mentira que inverte a gravidade a cada 1,2s. Cartão parado não conta o que
 a roupa é. Medido: 30 quadros distintos entre si, de 30.
 
-- **21 por metros somados** de todas as corridas, de **300 m a 119.000 m**. A
+- **15 por metros somados** de todas as corridas, de **500 m a 92.000 m**. A
   soma nunca anda para trás: uma corrida ruim ainda aproxima da próxima.
-- **8 por proeza** — chegar a 200 m, passar 10 obstáculos sem tocar nas
-  bordas, levar a roçada a ×8, alcançar o Desabamento, e assim por diante.
+- **14 por proeza.** Metade do armário sai daqui, e é de propósito: moer
+  metros desbloqueia o começo, mas as roupas que valem a pena caçar pedem
+  domínio — roçar cinco vezes bem rente, passar 30 obstáculos seguidos sem
+  roçar, cumprir os três desafios da mesma corrida, 60 segundos vivo, 25
+  obstáculos sem tocar nas bordas, passar dos 4.000 m.
 - **1 de saída**, a Avesso.
+
+A ordem no armário é a da dificuldade: as duas primeiras fileiras e um pedaço
+da terceira são metros somados; da metade da terceira em diante, só proezas.
 
 **Uma vez ganha, nunca se perde.** O conjunto fica em `avesso.ganhas`. A
 régua e a curva já mudaram três vezes; sem esse registro, cada mudança

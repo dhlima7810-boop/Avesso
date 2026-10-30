@@ -235,6 +235,25 @@ e movimento podem mudar.
 preto **e** com o osso: em brilho percebido, ficar entre 68 e 180. Há um teste
 que confere as 30.
 
+### A tela de fim diz por quanto você perdeu
+
+Cada desafio não cumprido vira uma **barra que enche até onde a corrida
+chegou**, e no lugar do ponto aparece **o que faltou**: `−6`, `−110`,
+`−2,4k`. Um desafio perdido por um obstáculo e um perdido por dez ficavam
+iguais na tela; agora não ficam.
+
+**A linha d'água é o que faz a barra ler como barra.** Sem a borda na ponta,
+o preenchimento parecia uma etiqueta atrás do número — em 11% ele terminava
+bem na borda do `−890` e virava uma caixinha. A borda é o que diz "cheguei
+até aqui".
+
+Acima de mil o número é abreviado (`−2,4k`), senão estoura a fenda e empurra
+o texto do desafio. O número inteiro fica no `aria-label`, para o leitor de
+tela: *"Faltaram 2387. Chegar ao Desabamento"*.
+
+As barras enchem **quando a tela entra**, não quando ela é montada: montada
+ela ainda está escondida, e a animação passaria sem ninguém ver.
+
 ### A marca do recorde
 
 Um fio vertical no campo, **pintado com a cor do setor onde ele cai** — do

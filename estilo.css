@@ -401,7 +401,35 @@ kbd{
   font-variant-numeric:tabular-nums;
 }
 
-.metas--fim .meta{padding:8px 13px}
+.metas--fim .meta{padding:8px 13px;position:relative;overflow:hidden}
+
+/* A barra que enche ate onde a corrida chegou. Fica ATRAS do texto, e por
+   isso os tres filhos precisam de position:relative — senao o preenchimento
+   passa por cima e o desafio fica ilegivel. */
+.meta__cheio{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:rgba(237,234,227,.09);
+  /* A LINHA D'AGUA. Sem ela o preenchimento lê como uma etiqueta atrás do
+     número, e não como um nível: em 11% ele terminava bem na borda do
+     "−888" e parecia uma caixinha. A borda da ponta é o que diz "cheguei
+     até aqui". */
+  border-right:2px solid rgba(237,234,227,.38);
+  pointer-events:none;
+}
+.meta--feita .meta__cheio{
+  background:rgba(255,59,20,.15);
+  border-right-color:var(--acento);
+}
+.metas--fim .meta__marca,
+.metas--fim .meta__texto,
+.metas--fim .meta__premio{position:relative}
+
+/* o que faltou cabe em tres caracteres: "−12" */
+.metas--fim .meta__marca{
+  min-width:2.8em;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+  font-weight:500;
+}
+.metas--fim .meta--feita .meta__marca{font-weight:700}
 
 /* ---------- os tres atos, no menu ---------- */
 /* Legenda, nao quadro: em bloco com borda isto comia altura demais e

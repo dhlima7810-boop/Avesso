@@ -719,10 +719,14 @@
     return fora;
   }
 
+  function estadoDesafio(m) {
+    return { m: m, rocadas: C.rocadas, maxMult: C.maxMult, maxSemTocar: C.maxSemTocar,
+      setor: C.setor, tempo: C.tempo, passados: C.passados, maxLimpo: C.maxLimpo };
+  }
+
   function conferirDesafios(m) {
     if (!C.desafios.length) return;
-    var e = { m: m, rocadas: C.rocadas, maxMult: C.maxMult, maxSemTocar: C.maxSemTocar,
-      setor: C.setor, tempo: C.tempo, passados: C.passados, maxLimpo: C.maxLimpo };
+    var e = estadoDesafio(m);
     for (var i = 0; i < C.desafios.length; i++) {
       var x = C.desafios[i];
       if (x.feito || x.d.le(e) < x.alvo) continue;
@@ -1389,6 +1393,16 @@
     var agora = tidas(), novas = [];
     for (var j = 0; j < agora.length; j++) if (antes.indexOf(agora[j]) < 0) novas.push(agora[j]);
 
+    // ate onde cada desafio chegou, para a tela de fim poder dizer por
+    // quanto se perdeu em vez de so marcar um ponto
+    var ed = estadoDesafio(m);
+    for (var f2 = 0; f2 < C.desafios.length; f2++) {
+      var xx = C.desafios[f2];
+      xx.valor = Math.floor(xx.d.le(ed));
+      if (xx.valor > xx.alvo) xx.valor = xx.alvo;
+      if (xx.valor < 0) xx.valor = 0;
+    }
+
     el.fimPlacar.textContent = m;
     el.fimSelo.textContent = novo ? 'Recorde' : 'Bateu';
     var feitos = 0;
@@ -1410,6 +1424,7 @@
       fechar(el.hud);
       fechar(el.hudPe);
       abrir(el.fim);
+      animarMetas();
       C.podeReiniciar = true;
       if (novas.length) SONS.roupa();
     });
@@ -1512,9 +1527,32 @@
       var li = document.createElement('li');
       li.className = 'meta' + (comResultado ? (x.feito ? ' meta--feita' : ' meta--perdida') : '');
 
+      // A barra enche ate onde a corrida chegou. Sem ela, um desafio perdido
+      // por um obstaculo e um perdido por dez ficavam iguais na tela.
+      if (comResultado) {
+        var alvo = x.alvo || 1;
+        var ate = x.feito ? 1 : Math.max(0, Math.min(1, (x.valor || 0) / alvo));
+        var cheio = document.createElement('span');
+        cheio.className = 'meta__cheio';
+        cheio.setAttribute('data-ate', (ate * 100).toFixed(1));
+        cheio.style.width = anima ? '0%' : (ate * 100).toFixed(1) + '%';
+        li.appendChild(cheio);
+      }
+
       var mk = document.createElement('span');
       mk.className = 'meta__marca';
-      mk.textContent = comResultado ? (x.feito ? '\u2713' : '\u00b7') : String(i + 1);
+      if (!comResultado) mk.textContent = String(i + 1);
+      else if (x.feito) mk.textContent = '\u2713';
+      else {
+        var falta = Math.max(1, (x.alvo || 0) - (x.valor || 0));
+        // acima de mil o numero cru estoura a casa ("−2387" numa fenda de
+        // tres digitos) e empurra o texto do desafio
+        var curto = falta >= 1000
+          ? (falta / 1000).toFixed(1).replace('.', ',') + 'k'
+          : String(falta);
+        mk.textContent = '\u2212' + curto;       // sinal de menos: o que faltou
+        li.setAttribute('aria-label', 'Faltaram ' + falta + '. ' + x.d.diz(x.alvo));
+      }
       li.appendChild(mk);
 
       var tx = document.createElement('span');
@@ -1621,6 +1659,18 @@
       el.novidadeLista.appendChild(b);
       C.cartoes.push({ cv: cvv, p: p, travada: false });
       pintarPeca(cvv, p, false, C.relogio);
+    }
+  }
+
+  // As barras enchem quando a tela de fim entra, nao quando ela e montada:
+  // montada ela ainda esta escondida, e a animacao passaria sem ninguem ver.
+  function animarMetas() {
+    if (!anima) return;
+    var barras = el.metasFim.querySelectorAll('.meta__cheio');
+    for (var i = 0; i < barras.length; i++) {
+      window.gsap.fromTo(barras[i], { width: '0%' },
+        { width: barras[i].getAttribute('data-ate') + '%', duration: 0.6,
+          ease: 'power3.out', delay: 0.12 * i, overwrite: true });
     }
   }
 

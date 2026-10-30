@@ -149,14 +149,50 @@ o mesmo aperto já segura a gravidade.
 
 ### Roçada
 
-Passar **raspando** num obstáculo — folga abaixo de `A.rocada`, 24px — rende
-um anel na tela, um tom agudo e **metros de bônus**. Roçadas seguidas sobem o
-multiplicador até ×8, e cada roçada vale o multiplicador da hora em metros.
-Uma passagem folgada zera.
+**Roçar é passar raspando num obstáculo sem bater nele.** A folga entre a
+borda do disco e a borda do obstáculo precisa ficar abaixo de `A.rocada`
+(50px, cerca de uma vez e meia a largura do disco).
 
-O grupo só é julgado **quando passa inteiro por trás do disco**, pela menor
-folga do trajeto todo — não pelo quadro em que o disco está mais perto. Um
-vão conta uma roçada só, não duas.
+**É uma escala, não uma porteira.** Qualquer passagem dentro da janela conta;
+o valor sobe conforme a folga encolhe, e de `A.rocadaRente` (10px) para
+dentro paga cheio:
+
+```
+valor = multiplicador × (0,35 + 0,65 × qualidade)      mínimo 1
+qualidade = 0 na beirada dos 50px, 1 colado no obstáculo
+```
+
+Antes eram 24px no liso: ou valia tudo ou não valia nada, e passar a 25px não
+dava nada. Quem jogava não via a diferença, então não aprendia o gesto.
+
+Três coisas importantes:
+
+1. **Conta uma vez por obstáculo**, não por quadro. O jogo guarda a **menor**
+   folga de toda a passagem e julga quando o obstáculo passa inteiro por trás
+   do disco.
+2. **Um vão conta uma roçada só**, mesmo sendo duas peças.
+3. **Passar folgado zera o multiplicador**, de uma vez, e conta uma passagem
+   limpa.
+
+Roçadas **seguidas** sobem o multiplicador até ×8, e ele é quem diz quanto se
+leva. O retorno é imediato e triplo: um **anel** que cresce e engrossa
+conforme a roçada foi mais rente, um **número** subindo ao lado dizendo
+quanto valeu, e um **tom** que sobe com a corrente. No HUD aparece
+`ROÇADA ×N`.
+
+A câmera lenta dispara a 20px, que está dentro da janela: **se o tempo
+desacelerou e você não morreu, roçou**. O contrário não vale — dá para roçar
+entre 20 e 50px sem câmera lenta.
+
+### Os desafios avisam na hora
+
+Cumprir um desafio no meio da corrida mostra **qual** foi, não só o prêmio:
+`Desafio · Roçar 6 vezes · +74 m`. Com três por partida, dizer só "+74 m" não
+conta o que caiu nem o que ainda falta.
+
+**Os avisos entram numa fila**, um a cada 1,8s. Medido: "Roçar 1 vez" e
+"Levar a roçada a ×1" caem na **mesma** roçada, e sem a fila o segundo aviso
+apagava o primeiro antes de dar tempo de ler.
 
 ### Roupas
 

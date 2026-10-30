@@ -88,6 +88,16 @@ body{
 }
 .aviso[hidden]{display:none}
 /* o nome do ato e lembrete, nao manchete: quem conta o ato e o mundo */
+/* o desafio cumprido diz a frase inteira, entao precisa caber em duas
+   linhas sem virar manchete */
+.aviso--meta{
+  font-size:clamp(12px,1.7vw,21px);
+  letter-spacing:.14em;line-height:1.5;
+  max-width:min(620px,88vw);
+  margin-left:auto;margin-right:auto;
+  text-shadow:0 1px 14px rgba(0,0,0,.65);
+}
+
 .aviso--ato{
   font-size:clamp(12px,1.6vw,19px);
   letter-spacing:.3em;font-weight:700;

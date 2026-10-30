@@ -49,7 +49,13 @@
     // lugar. Mexer aqui muda so a escala do placar, nunca a dificuldade:
     // quem decide o quanto aperta e a tabela ATOS, mais a rampa de velocidade.
     passoM: 20,
-    rocada: 24,          // folga que ainda conta como rocada
+    // A ROCADA E UMA ESCALA, nao uma porteira. Qualquer passagem a menos de
+    // `rocada` px conta; o valor sobe conforme a folga encolhe, e a partir de
+    // `rocadaRente` ela paga cheio. Antes era 24px no liso: ou valia tudo ou
+    // nao valia nada, e passar a 25px nao dava nada — o que tornava a coisa
+    // invisivel para quem joga.
+    rocada: 50,          // folga maxima que ainda conta
+    rocadaRente: 10,     // daqui para dentro paga cheio
     multMax: 8,
     perigo: 20,          // folga que dispara a camera lenta
     lenta: 0.42          // quanto o tempo desacelera no perigo
@@ -567,13 +573,24 @@
         C.passados++;
         if (C.semTocar > C.maxSemTocar) C.maxSemTocar = C.semTocar;
         if (g.dmin < A.rocada) {
+          // qualidade: 0 na beirada da janela, 1 colado no obstaculo
+          var q = 1 - (g.dmin - A.rocadaRente) / (A.rocada - A.rocadaRente);
+          q = q < 0 ? 0 : (q > 1 ? 1 : q);
+
           C.mult = Math.min(C.mult + 1, A.multMax);
           if (C.mult > C.maxMult) C.maxMult = C.mult;
-          C.bonus += C.mult;
+
+          // o multiplicador diz quantas seguidas; a qualidade diz o quanto
+          // daquilo se leva. Raspar de longe sempre paga alguma coisa, e
+          // raspar rente paga o multiplicador inteiro.
+          var val = Math.round(C.mult * (0.35 + 0.65 * q));
+          if (val < 1) val = 1;
+
+          C.bonus += val;
           C.rocadas++;
           C.limpo = 0;
-          C.faiscas.push({ x: g.x + g.w, y: C.y, v: 1, n: C.mult });
-          SONS.rocada(C.mult);
+          C.faiscas.push({ x: g.x + g.w, y: C.y, v: 1, n: val, q: q });
+          SONS.rocada(C.mult + q * 3);
         } else {
           C.mult = 0;
           C.limpo++;
@@ -712,7 +729,12 @@
       x.feito = true;
       C.bonus += x.premio;
       C.premioDesafios += x.premio;
-      avisar('+' + x.premio + ' m', '#ff3b14');
+      // dizer so "+84 m" nao conta QUAL desafio caiu, e com tres por partida
+      // a pessoa nao sabe o que acabou de cumprir nem o que ainda falta
+      // Dois desafios podem cair na MESMA roçada — medido: "Roçar 1 vez" e
+      // "Levar a roçada a ×1" caem juntos, e o segundo aviso apagava o
+      // primeiro antes de dar tempo de ler. Por isso eles entram numa fila.
+      enfileirar('Desafio · ' + x.d.diz(x.alvo) + ' · +' + x.premio + ' m');
       SONS.meta();
     }
   }
@@ -1186,14 +1208,30 @@
     }
 
     // faiscas da rocada
+    // O anel cresce e engrossa conforme a roçada foi mais rente, e o numero
+    // sobe ao lado dizendo quanto valeu: sem isso a escala e invisivel e a
+    // pessoa nao aprende que chegar mais perto paga mais.
     for (var k = 0; k < C.faiscas.length; k++) {
       var fa = C.faiscas[k];
+      var fq = fa.q === undefined ? 1 : fa.q;
+      var fx = fa.x - C.camX;
       cx.save();
-      cx.globalAlpha = Math.max(0, fa.v) * 0.9;
-      cx.strokeStyle = p.cor; cx.lineWidth = 2.5;
+      cx.globalAlpha = Math.max(0, fa.v) * (0.5 + fq * 0.5);
+      cx.strokeStyle = p.cor;
+      cx.lineWidth = 1.6 + fq * 2.6;
       cx.beginPath();
-      cx.arc(fa.x - C.camX, fa.y, A.raio * (1.3 + (1 - fa.v) * 2.4), 0, 6.2832);
+      cx.arc(fx, fa.y, A.raio * (1.1 + fq * 0.6 + (1 - fa.v) * 2.4), 0, 6.2832);
       cx.stroke();
+
+      if (fa.n) {
+        cx.globalAlpha = Math.max(0, fa.v);
+        cx.fillStyle = p.cor;
+        cx.font = '700 ' + (A.raio * (0.85 + fq * 0.45)).toFixed(0) +
+          'px "Space Grotesk", ui-sans-serif, sans-serif';
+        cx.textAlign = 'left';
+        cx.textBaseline = 'middle';
+        cx.fillText('+' + fa.n, fx + A.raio * 1.5, fa.y - (1 - fa.v) * 30);
+      }
       cx.restore();
     }
 
@@ -1306,6 +1344,8 @@
     limparMundo();
     C.proximoX = C.camX + C.larg * 0.95;
     C.podeReiniciar = false;
+    fila.length = 0;
+    if (filaTimer !== null) { window.clearTimeout(filaTimer); filaTimer = null; }
     el.placar.textContent = '0';
     el.hudRecorde.textContent = C.recorde;
     el.hudSetor.textContent = ATOS[0].nome;
@@ -1427,6 +1467,20 @@
   function esperar(seg, feito) {
     if (window.gsap) window.gsap.delayedCall(seg, feito);
     else window.setTimeout(feito, seg * 1000);
+  }
+
+  // Fila de avisos de desafio: um de cada vez, com tempo de ler.
+  var fila = [], filaTimer = null;
+
+  function enfileirar(texto) {
+    fila.push(texto);
+    if (filaTimer === null) soltarFila();
+  }
+
+  function soltarFila() {
+    if (!fila.length) { filaTimer = null; return; }
+    avisar(fila.shift(), '#ff3b14', 1500, 'meta');
+    filaTimer = window.setTimeout(soltarFila, 1800);
   }
 
   var avisoTimer = null;

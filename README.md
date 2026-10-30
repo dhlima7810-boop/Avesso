@@ -142,6 +142,15 @@ contagens e segundos não dobraram, porque "roçar 3 vezes" é uma meta e não u
 distância. Com a mediana em ~113 m, um prêmio difícil agora mais que dobra a
 corrida — e é para ser assim: desafio cumprido tem de ser sentido no número.
 
+**O desafio de distância comeca em 500 m.** Os alvos eram 100 / 220 / 360 e
+caíam sozinhos em qualquer corrida mediana — "chegar a 220 m" não pedia nada
+de quem já joga bem. Agora são **500 / 650 / 850**, com prêmios de +96, +140
+e +200 m. Medido com o piloto automático: 21 corridas, mediana de 111 m,
+melhor de 255 m, **nenhuma passou dos 500**. O alvo é de propósito mais alto
+que a corrida de hoje: é uma meta de recorde, não de rotina, e quem não chega
+vê na tela do fim quanto faltou. Se um dia parecer longe demais, a volta é
+uma linha só — `alvos` do desafio `dist`, no `jogo.js`.
+
 **A contagem é pulável, e isso é de propósito.** Uma corrida dura uns dez
 segundos; 2,2 s de pré-jogo obrigatório a cada tentativa viraria castigo lá
 pela vigésima. Quem chega vê; quem está tentando de novo aperta e larga — e

@@ -190,8 +190,10 @@
   // mais que dobra a corrida — e e para ser assim: desafio cumprido tem de
   // ser sentido no numero.
   var DESAFIOS = [
+    // A distancia so comeca a valer desafio a partir dos 500 m: abaixo disso
+    // ela caia sozinha em qualquer corrida mediana e o desafio nao pedia nada.
     { id: 'dist',   diz: function (n) { return 'Chegar a ' + n + ' m'; },
-      alvos: [100, 220, 360], premios: [32, 68, 120], le: function (e) { return e.m; } },
+      alvos: [500, 650, 850], premios: [96, 140, 200], le: function (e) { return e.m; } },
 
     { id: 'rocar',  diz: function (n) { return 'Roçar ' + n + (n > 1 ? ' vezes' : ' vez'); },
       alvos: [3, 6, 10], premios: [36, 74, 130], le: function (e) { return e.rocadas; } },

@@ -42,6 +42,7 @@
     velMenu: 90,
     rastro: 11,
     inverteEm: 0.055,
+    cargaSeg: 1.1,       // quanto tempo o botao de reviver pede segurado
 
     // A REGUA. 1 m = 20px: a 400px/s o contador sobe uns 20 m por segundo, e
     // dá para atravessar a tela antes de chegar nos 100. Com 7px ele subia
@@ -256,6 +257,8 @@
     mult: 0, bonus: 0, rocadas: 0, rentes: 0, semTocar: 0,
     maxMult: 0, maxSemTocar: 0, limpo: 0, maxLimpo: 0, passados: 0,
     desafios: [], premioDesafios: 0,
+    revives: 0, carga: 0, carregando: false, custoRev: 0, creditado: 0, brilho: 0,
+    cargaT0: 0, cargaSolta: 0, soltaT0: 0,
     passouRecorde: false, primeiro: true,
     recorde: 0, total: 0,
     proezas: {}, ganhas: {}, vestido: 'avesso',
@@ -295,6 +298,10 @@
   function clarear(h, t) { return cor(mistura(doHex(h), [255, 255, 255], t)); }
 
   function acaso(min, max) { return min + Math.random() * (max - min); }
+
+  function agoraMs() {
+    return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+  }
 
   // distancia do centro do circulo ate o retangulo; negativa quer dizer dentro
   function folga(cxx, cyy, r, x, y, w, h) {
@@ -347,6 +354,8 @@
     marca:  function ()     { tom(660, 990, 0.3, 'triangle', 0.07); },
     meta:   function ()     { tom(700, 1050, 0.26, 'triangle', 0.07); },
     conta:  function (n)    { tom(n > 1 ? 380 : 620, n > 1 ? 380 : 780, 0.12, 'triangle', 0.05); },
+    reviver: function ()    { tom(330, 660, 0.22, 'triangle', 0.07);
+                              window.setTimeout(function () { tom(494, 988, 0.34, 'triangle', 0.06); }, 110); },
     roupa:  function ()     { tom(523, 523, 0.14, 'triangle', 0.07);
                               window.setTimeout(function () { tom(659, 659, 0.14, 'triangle', 0.07); }, 120);
                               window.setTimeout(function () { tom(784, 784, 0.3, 'triangle', 0.07); }, 240); }
@@ -514,6 +523,13 @@
   }
 
   /* §8 — passo da fisica ------------------------------------------------- */
+
+  // Reviver custa metros somados, e o preco sobe com a distancia ja feita e
+  // com quantas vezes ja se reviveu nesta corrida. Sem o segundo fator, uma
+  // corrida boa viraria infinita para quem tem poupanca.
+  function custoReviver(m) {
+    return Math.round((80 + m * 2) * (C.revives + 1));
+  }
 
   function placarAgora() {
     return Math.floor((C.camX - C.base) / A.passoM) + C.bonus;
@@ -839,6 +855,23 @@
     }
 
     if (C.tremor > 0) C.tremor = Math.max(0, C.tremor - dtReal * 55);
+    if (C.brilho > 0) C.brilho = Math.max(0, C.brilho - dtReal * 2.4);
+
+    // A barra do reviver anda pelo RELOGIO, nao pelo tempo de quadro. Somar
+    // `dt` aqui amarra a confirmacao a velocidade de renderizacao: medido num
+    // navegador lento, a carga subia 0,51 por segundo em vez de 0,91, e
+    // segurar 1,1s nao bastava. Quanto tempo o dedo ficou em cima e uma
+    // pergunta de relogio, nao de quadro.
+    if (C.estado === 'morto') {
+      if (C.carregando) {
+        C.carga = (agoraMs() - C.cargaT0) / (A.cargaSeg * 1000);
+        if (C.carga >= 1) { C.carga = 1; escreverCarga(); reviver(); }
+        else escreverCarga();
+      } else if (C.carga > 0) {
+        C.carga = Math.max(0, C.cargaSolta - (agoraMs() - C.soltaT0) / 250);
+        escreverCarga();
+      }
+    }
 
     // quando a gravidade vira, o relogio do movimento marca a hora: Avesso,
     // Mola e Bussola vivem disso
@@ -1280,6 +1313,14 @@
       cx.restore();
     }
 
+    // o clarão do renascimento, por cima de tudo
+    if (C.brilho > 0.01) {
+      cx.globalAlpha = Math.min(1, C.brilho) * 0.9;
+      cx.fillStyle = solido;
+      cx.fillRect(-48, -48, C.larg + 96, C.alt + 96);
+      cx.globalAlpha = 1;
+    }
+
     cx.restore();
   }
 
@@ -1372,6 +1413,9 @@
     limparMundo();
     C.proximoX = C.camX + C.larg * 0.95;
     C.podeReiniciar = false;
+    C.revives = 0; C.creditado = 0;
+    C.carga = 0; C.carregando = false; C.brilho = 0;
+    el.btReviver.hidden = true;
     fila.length = 0;
     if (filaTimer !== null) { window.clearTimeout(filaTimer); filaTimer = null; }
     el.placar.textContent = '0';
@@ -1406,7 +1450,11 @@
     var m = placarAgora();
     var antes = tidas();
 
-    C.total += m;
+    // Só o que AINDA não foi creditado. Com o reviver, a mesma corrida passa
+    // por morrer() mais de uma vez; somar `m` inteiro a cada morte daria os
+    // metros em dobro.
+    C.total += m - C.creditado;
+    C.creditado = m;
     guardar('avesso.total', C.total);
     conferirProezas(m);
     gravarGanhas();
@@ -1441,6 +1489,7 @@
 
     montarNovidade(novas);
     montarBarra();
+    montarReviver(m);
     void p;
 
     esperar(0.55, function () {
@@ -1449,7 +1498,12 @@
       fechar(el.hudPe);
       abrir(el.fim);
       animarMetas();
-      C.podeReiniciar = true;
+      // Um respiro antes de aceitar o reinício. Quem morre quase sempre está
+      // martelando o botão, e sem esta pausa a corrida recomeçava antes de a
+      // pessoa ver que dava para reviver — a escolha some antes de existir.
+      esperar(0.3, function () {
+        if (C.estado === 'morto') C.podeReiniciar = true;
+      });
       if (novas.length) SONS.roupa();
     });
   }
@@ -1461,6 +1515,9 @@
     C.fFaixa = ATOS[0].fFaixa;
     limparMundo();
     atualizarMenu();
+    C.carregando = false; C.carga = 0;
+    el.btReviver.hidden = true;
+    fecharClose();
     fechar(el.hud); fechar(el.hudPe); fechar(el.fim); fechar(el.pausa);
     fechar(el.vestiario); fechar(el.largada); fechar(el.ajuda);
     abrir(el.inicio);
@@ -1703,6 +1760,70 @@
     }
   }
 
+  var cargaEscrita = -1;
+  function escreverCarga() {
+    var pc = Math.round(C.carga * 100);
+    if (pc === cargaEscrita) return;
+    cargaEscrita = pc;
+    el.revCheio.style.width = pc + '%';
+  }
+
+  function montarReviver(m) {
+    C.custoRev = custoReviver(m);
+    var pode = C.total >= C.custoRev;
+    el.btReviver.hidden = false;
+    el.btReviver.className = 'reviver' + (pode ? '' : ' reviver--pobre');
+    el.btReviver.disabled = !pode;
+    el.revTxt.textContent = pode ? 'Segure para reviver' : 'Metros insuficientes';
+    el.revCusto.textContent = pode
+      ? '\u2212' + C.custoRev + ' m'
+      : 'faltam ' + (C.custoRev - C.total) + ' m';
+    C.carga = 0;
+    C.carregando = false;
+    escreverCarga();
+  }
+
+  function reviver() {
+    if (C.total < C.custoRev) { C.carga = 0; C.carregando = false; escreverCarga(); return; }
+    C.total -= C.custoRev;
+    guardar('avesso.total', C.total);
+    C.revives++;
+    C.carga = 0; C.carregando = false; escreverCarga();
+
+    // Abre caminho: renascer em cima do obstáculo que matou seria piada.
+    var jx = C.camX + C.larg * A.xJogador;
+    var i = 0;
+    while (i < C.obst.length) {
+      if (C.obst[i].x + C.obst[i].w > jx - A.raio - 80 && C.obst[i].x < C.camX + C.larg * 1.3) {
+        C.obst.splice(i, 1);
+      } else i++;
+    }
+    if (C.proximoX < C.camX + C.larg * 1.3) C.proximoX = C.camX + C.larg * 1.3;
+
+    C.y = C.alt / 2;
+    C.vy = 0;
+    C.segurando = false;
+    C.mult = 0; C.limpo = 0;
+    C.rastro.length = 0; C.cacos.length = 0;
+    C.escalaTempo = 1;
+    C.brilho = 1;
+
+    var quantos = C.poucoMov ? 8 : 26;
+    for (var k = 0; k < quantos; k++) {
+      var an = acaso(0, 6.2832), fo = acaso(160, 620);
+      C.cacos.push({ x: jx, y: C.y, vx: Math.cos(an) * fo, vy: Math.sin(an) * fo,
+        a: acaso(0, 3.14), va: acaso(-9, 9), t: acaso(3, 9), v: acaso(0.6, 1.1) });
+    }
+    SONS.reviver();
+
+    C.estado = 'jogando';
+    C.podeReiniciar = false;
+    el.btReviver.hidden = true;
+    fechar(el.fim);
+    abrir(el.hud);
+    abrir(el.hudPe);
+  }
+
   function montarBarra() {
     var prox = proximaPorSoma();
     if (!prox) { el.barra.hidden = true; return; }
@@ -1716,6 +1837,36 @@
     } else {
       el.barraCheio.style.width = (frac * 100).toFixed(1) + '%';
     }
+  }
+
+  // A roupa escolhida se apresenta: grande, no meio da tela, fazendo o
+  // proprio movimento, com o resto fora de foco. Trocar so a borda do cartao
+  // nao conta o que ela e — e o movimento e justamente o que a diferencia.
+  var closeP = null, closeTimer = null;
+
+  function mostrarClose(p) {
+    closeP = p;
+    el.closeNome.textContent = p.nome;
+    el.closeDiz.textContent = p.diz || '';
+    el.close.hidden = false;
+    if (anima) {
+      window.gsap.fromTo(el.close, { autoAlpha: 0 },
+        { autoAlpha: 1, duration: 0.6, ease: 'power3.out', overwrite: true });
+    }
+    if (closeTimer) window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(fecharClose, 2100);
+  }
+
+  function fecharClose() {
+    if (el.close.hidden) return;
+    if (closeTimer) { window.clearTimeout(closeTimer); closeTimer = null; }
+    if (!anima) { el.close.hidden = true; closeP = null; return; }
+    window.gsap.to(el.close, { autoAlpha: 0, duration: 0.6, ease: 'power3.out', overwrite: true,
+      onComplete: function () {
+        el.close.hidden = true;
+        window.gsap.set(el.close, { clearProps: 'all' });
+        closeP = null;
+      } });
   }
 
   function vestir(id) {
@@ -1852,6 +2003,8 @@
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         e.preventDefault();
         if (!el.vestiario.hidden || !el.ajuda.hidden) return;   // ali o espaco nao joga
+        if (!el.close.hidden) { fecharClose(); return; }
+        if (document.activeElement === el.btReviver) return;    // ali ele carrega
         apertou();
       } else if (e.code === 'Escape' || e.code === 'KeyP') {
         if (!el.vestiario.hidden) { fecharVestiario(); return; }
@@ -1868,6 +2021,7 @@
     el.palco.addEventListener('pointerdown', function (e) {
       if (e.target.closest('button, label, input, a')) return;
       if (!el.vestiario.hidden || !el.ajuda.hidden) return;
+      if (!el.close.hidden) { fecharClose(); return; }
       e.preventDefault();
       apertou();
     });
@@ -1886,14 +2040,54 @@
     el.btVestiario.addEventListener('click', abrirVestiario);
     el.btVestiario2.addEventListener('click', abrirVestiario);
     el.btVestFechar.addEventListener('click', fecharVestiario);
+    // Reviver é SEGURAR, não clicar: um clique seco torraria a poupança no
+    // susto da morte. A barra que enche é a confirmação.
+    var pegarCarga = function (e) {
+      if (el.btReviver.disabled || C.estado !== 'morto') return;
+      e.preventDefault();
+      somAcordar();
+      C.carregando = true;
+      C.cargaT0 = agoraMs();
+      if (e.pointerId !== undefined) {
+        try { el.btReviver.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+    };
+    var largarCarga = function () {
+      if (!C.carregando) return;
+      C.carregando = false;
+      C.cargaSolta = C.carga;
+      C.soltaT0 = agoraMs();
+    };
+
+    el.btReviver.addEventListener('pointerdown', pegarCarga);
+    el.btReviver.addEventListener('pointerup', largarCarga);
+    el.btReviver.addEventListener('pointercancel', largarCarga);
+    el.btReviver.addEventListener('pointerleave', largarCarga);
+    window.addEventListener('pointerup', largarCarga);
+    window.addEventListener('blur', largarCarga);
+
+    el.btReviver.addEventListener('keydown', function (e) {
+      if (e.repeat || el.btReviver.disabled) return;
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); pegarCarga(e); }
+    });
+    el.btReviver.addEventListener('keyup', function (e) {
+      if (e.code === 'Space' || e.code === 'Enter') largarCarga();
+    });
+    // clicar seco não revive: o botão existe para ser segurado
+    el.btReviver.addEventListener('click', function (e) { e.preventDefault(); });
+
+    el.close.addEventListener('pointerdown', fecharClose);
+
     el.btAjuda.addEventListener('click', abrirAjuda);
     el.btAjudaFechar.addEventListener('click', fecharAjuda);
 
     el.grade.addEventListener('click', function (e) {
       var b = e.target.closest('.peca');
       if (!b || b.disabled) return;
-      vestir(b.getAttribute('data-id'));
+      var ident = b.getAttribute('data-id');
+      vestir(ident);
       montarGrade();
+      if (porId[ident]) mostrarClose(porId[ident]);
     });
 
     el.novidadeLista.addEventListener('click', function (e) {
@@ -1926,6 +2120,7 @@
     abrir(el.vestiario);
   }
   function fecharVestiario() {
+    fecharClose();          // senão ele atravessa a saída e engole a tecla seguinte
     fechar(el.vestiario);
     if (voltarPara === 'fim') { abrir(el.fim); }
     else { atualizarMenu(); abrir(el.inicio); }
@@ -1938,6 +2133,7 @@
     if (dt > 0) atualizar(dt);
     desenhar();
     if (!C.poucoMov && (!el.vestiario.hidden || !el.fim.hidden)) pintarCartoes();
+    if (closeP && !el.close.hidden) pintarPeca(el.closeFig, closeP, false, C.relogio);
   }
 
   function ligarLaco() {
@@ -1960,6 +2156,8 @@
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
       'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
       'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos', 'hudPe',
+      'btReviver', 'revCheio', 'revTxt', 'revCusto',
+      'close', 'closeFig', 'closeNome', 'closeDiz',
       'ajuda', 'btAjuda', 'btAjudaFechar', 'ajRocada', 'ajRente', 'ajMult',
       'ajQuantas', 'ajAtos', 'ajRoupas',
       'btJogar', 'btDeNovo', 'btMenu', 'btVoltar', 'btSair', 'btVestiario', 'btVestiario2',

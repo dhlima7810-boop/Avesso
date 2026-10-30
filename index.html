@@ -91,6 +91,14 @@
       <p class="barra__trilho"><span class="barra__cheio" id="barraCheio"></span></p>
     </div>
 
+    <button class="reviver" id="btReviver" type="button" hidden>
+      <span class="reviver__cheio" id="revCheio" aria-hidden="true"></span>
+      <span class="reviver__corpo">
+        <span class="reviver__txt" id="revTxt">Segure para reviver</span>
+        <span class="reviver__custo" id="revCusto">−0 m</span>
+      </span>
+    </button>
+
     <button class="botao" id="btDeNovo" type="button">De novo</button>
     <div class="fim__pes">
       <button class="botao botao--fantasma" id="btVestiario2" type="button">Vestiário</button>
@@ -211,6 +219,12 @@
   </section>
 
 </main>
+
+  <div class="close" id="close" hidden aria-live="polite">
+    <canvas class="close__fig" id="closeFig" width="440" height="440" aria-hidden="true"></canvas>
+    <p class="close__nome" id="closeNome"></p>
+    <p class="close__diz" id="closeDiz"></p>
+  </div>
 
 <noscript><p class="semjs semjs--fora">Este jogo precisa de JavaScript para rodar.</p></noscript>
 

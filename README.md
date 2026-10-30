@@ -241,6 +241,50 @@ e movimento podem mudar.
 preto **e** com o osso: em brilho percebido, ficar entre 68 e 180. Há um teste
 que confere as 30.
 
+### Reviver
+
+Na tela de fim, **acima do "De novo"**, há um botão que devolve a corrida de
+onde ela parou. A moeda são os **metros somados**, e o preço sobe com a
+distância já feita e com quantas vezes já se reviveu nesta corrida:
+
+```
+custo = (80 + placar × 2) × (revives + 1)
+```
+
+Sem o segundo fator, uma corrida boa viraria infinita para quem tem poupança.
+Sem metros bastantes, o botão aparece desabilitado e diz quanto falta.
+
+**Reviver é SEGURAR, não clicar.** Um clique seco torraria a poupança no
+susto da morte; a barra laranja que enche é a confirmação. Ao renascer, o
+caminho à frente é aberto — renascer em cima do obstáculo que matou seria
+piada — e um clarão cobre a tela.
+
+**A barra anda pelo relógio, não pelo tempo de quadro.** Somar `dt` amarra a
+confirmação à velocidade de renderização: medido num navegador lento, a carga
+subia 0,51 por segundo em vez de 0,91, e segurar 1,1 s não bastava. Quanto
+tempo o dedo ficou em cima é pergunta de relógio.
+
+**Há um respiro de 0,3 s antes de o reinício ser aceito.** Quem morre quase
+sempre está martelando o botão, e sem a pausa a corrida recomeçava antes de a
+pessoa ver que dava para reviver — a escolha sumia antes de existir.
+
+**O placar só credita o que ainda não foi creditado.** Com o reviver, a mesma
+corrida passa por `morrer()` mais de uma vez; somar o placar inteiro a cada
+morte daria os metros em dobro. Medido: morrer em 35 m, reviver, morrer em
+177 m credita 142.
+
+### A roupa se apresenta
+
+Vestir uma peça no vestiário abre um **close**: ela aparece grande no meio da
+tela, fazendo o próprio movimento, com o resto fora de foco, ao lado do nome e
+da frase que descreve o movimento. Trocar só a borda do cartão não conta o que
+a roupa é — e o movimento é justamente o que a diferencia.
+
+Fecha sozinho em 2,1 s, ou num clique. Ele **recebe o ponteiro de propósito**:
+com `pointer-events:none` dava para clicar às cegas no armário por baixo do
+desfoque, e não havia como dispensá-lo a não ser esperando. E sair do
+vestiário o fecha, senão ele atravessa a saída e engole a tecla seguinte.
+
 ### A tela de fim diz por quanto você perdeu
 
 Cada desafio não cumprido vira uma **barra que enche até onde a corrida

@@ -569,3 +569,78 @@ kbd{
 }
 .guia__teclas dd{margin:0;font-size:clamp(11px,1.2vw,13px);color:rgba(237,234,227,.78)}
 .guia__teclas kbd{margin-right:3px}
+
+/* ---------- reviver ---------- */
+/* Segurar, não clicar: reviver gasta metros somados, e um clique seco faria
+   a pessoa torrar a poupança sem querer no calor da morte. A barra que
+   carrega é a confirmação. */
+
+.reviver{
+  appearance:none;-webkit-appearance:none;
+  position:relative;overflow:hidden;
+  width:min(320px,80vw);
+  border:2px solid var(--laranja);border-radius:999px;
+  background:transparent;color:var(--osso);
+  padding:13px 24px;cursor:pointer;
+  font-family:var(--display);
+  transition:border-color .25s var(--saida), opacity .25s var(--saida);
+}
+.reviver[hidden]{display:none}
+.reviver:focus-visible{outline:2px solid var(--osso);outline-offset:4px}
+
+.reviver__cheio{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:var(--laranja);
+  pointer-events:none;
+}
+.reviver__corpo{
+  position:relative;display:flex;align-items:baseline;justify-content:center;gap:.8em;
+  mix-blend-mode:difference;color:#fff;
+}
+.reviver__txt{
+  font-weight:700;font-size:clamp(12px,1.25vw,15px);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.reviver__custo{
+  font-size:clamp(10px,1.1vw,13px);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;opacity:.8;
+}
+
+.reviver--pobre{border-color:var(--fio);cursor:default;opacity:.55}
+.reviver--pobre .reviver__cheio{display:none}
+
+/* ---------- o close da roupa escolhida ---------- */
+/* Escolher uma roupa e ela só trocar de borda no cartão é pouco: aqui ela
+   aparece grande, fazendo o próprio movimento, com o resto da tela fora de
+   foco. É o momento em que a roupa se apresenta. */
+
+.close{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(10px,1.6vw,18px);
+  background:rgba(12,13,16,.72);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  /* recebe o ponteiro de propósito: com `none` dava para clicar às cegas no
+     armário por baixo do desfoque, e não havia como dispensar o close a não
+     ser esperando */
+  cursor:pointer;text-align:center;
+}
+.close[hidden]{display:none}
+
+.close__fig{
+  width:min(42vmin,300px);height:min(42vmin,300px);display:block;
+}
+.close__nome{
+  margin:0;font-weight:700;
+  font-size:clamp(30px,6vw,64px);line-height:.9;
+  letter-spacing:-.03em;text-transform:uppercase;
+}
+.close__diz{
+  margin:0;max-width:30ch;
+  font-size:clamp(12px,1.4vw,16px);line-height:1.5;
+  color:rgba(237,234,227,.62);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .close{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(12,13,16,.92)}
+}

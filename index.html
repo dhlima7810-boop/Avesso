@@ -24,8 +24,13 @@
   <div class="hud" id="hud" hidden>
     <p class="hud__placar"><span id="placar">0</span><span class="hud__un">m</span></p>
     <p class="hud__lado">
-      <span class="hud__mult" id="mult" hidden>Roçada &times;<span id="multN">1</span><span class="hud__sep">·</span></span>
       <span id="hudSetor">Subsolo</span> <span class="hud__dif" id="hudDif">Fácil</span><span class="hud__sep">·</span>Recorde <span id="hudRecorde">0</span> m
+    </p>
+  </div>
+
+  <div class="hud hud--pe" id="hudPe" hidden>
+    <p class="corrente" id="mult" hidden>
+      <span class="corrente__rot">Roçada</span><b class="corrente__n">&times;<span id="multN">1</span></b>
     </p>
   </div>
 
@@ -54,6 +59,10 @@
         <input type="checkbox" id="optSom" checked>
         <span>Som</span>
       </label>
+      <button class="opcao opcao--botao" id="btAjuda" type="button">
+        <span class="opcao__sinal" aria-hidden="true">?</span>
+        <span>Como se joga</span>
+      </button>
     </p>
     <p class="semjs">Este jogo precisa de JavaScript para rodar.</p>
   </section>
@@ -87,6 +96,105 @@
       <button class="botao botao--fantasma" id="btVestiario2" type="button">Vestiário</button>
       <button class="botao botao--fantasma" id="btMenu" type="button">Menu</button>
     </div>
+  </section>
+
+  <section class="tela tela--ajuda" id="ajuda" hidden aria-labelledby="ajudaSelo">
+    <p class="selo" id="ajudaSelo">Como se joga</p>
+
+    <div class="guia">
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">Um botão só</h2>
+        <p><b>Segure</b> e a gravidade vira para cima. <b>Solte</b> e ela volta
+        para baixo. Não existe pulo: o botão não dá impulso, ele troca o lado
+        para onde o mundo puxa.</p>
+        <p>Por isso toques curtos encadeados deixam o disco <b>flutuar</b> no
+        meio do campo, em vez de subir e cair em arcos.</p>
+        <p>O ponto dentro do disco fica sempre do lado para onde a gravidade
+        puxa — é ele que diz o que está acontecendo.</p>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">A tela vira junto</h2>
+        <p>Enquanto você segura, o fundo e as paredes trocam de cor. É o nome
+        do jogo, e serve para você saber de relance que está segurando.</p>
+        <p>Quem preferir pode desligar no menu, em <b>Inverter a tela</b>. O
+        jogo continua inteiro: o ponto no disco continua dizendo tudo.</p>
+      </section>
+
+      <section class="guia__bloco guia__bloco--forte">
+        <h2 class="guia__t">Roçar</h2>
+        <p><b>Roçar é passar raspando num obstáculo sem bater nele.</b> A folga
+        entre a borda do disco e a borda do obstáculo precisa ficar abaixo de
+        <b><span id="ajRocada">50</span> px</b> — cerca de uma vez e meia a
+        largura do disco.</p>
+        <p><b>Não é tudo ou nada.</b> Qualquer passagem perto conta, e quanto
+        mais rente, mais paga. De <span id="ajRente">10</span> px para dentro
+        paga cheio.</p>
+        <p><b>Roçadas seguidas formam uma corrente.</b> Cada uma sobe o
+        multiplicador, até <b>&times;<span id="ajMult">8</span></b>, e é ele
+        que diz quanto se leva. <b>Passar folgado zera a corrente</b> — de uma
+        vez, não aos poucos. A corrente aparece no rodapé enquanto está viva.</p>
+        <p>Três sinais dizem que você roçou: um <b>anel</b>, que cresce e
+        engrossa conforme foi mais rente; um <b>número</b> subindo ao lado,
+        dizendo quanto valeu; e um <b>tom</b> que sobe com a corrente.</p>
+        <p class="guia__dica">O atalho: <b>se o tempo desacelerou e você não
+        morreu, você roçou.</b> A câmera lenta dispara um pouco antes do limite,
+        então ela está sempre dentro da janela.</p>
+        <p>Um obstáculo conta <b>uma vez só</b>, pela menor folga de toda a
+        passagem — e um vão conta uma roçada, não duas.</p>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">Os três atos</h2>
+        <p>A corrida atravessa três partes, cada uma com cara e dificuldade
+        próprias. O mundo muda de cor, de ar e de obstáculo ao passar de uma
+        para a outra.</p>
+        <ul class="guia__atos" id="ajAtos"></ul>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">Os desafios da partida</h2>
+        <p>Antes de cada corrida saem <b>três desafios sorteados</b> — um
+        fácil, um médio e um difícil. Cumprido, cada um paga metros de bônus
+        que entram no placar, no recorde e nos metros somados.</p>
+        <p>A contagem de 3 a 1 é <b>pulável</b>: aperte o botão e a corrida
+        começa na hora. O mesmo aperto já segura a gravidade.</p>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">A marca do recorde</h2>
+        <p>Um fio vertical no campo marca a distância do seu recorde, pintado
+        com a cor do ato onde ele cai. Ele <b>anda para trás a cada roçada</b>,
+        porque o bônus já comeu parte da diferença.</p>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">As <span id="ajQuantas">30</span> roupas</h2>
+        <p><b>O nome de cada roupa é o que ela faz.</b> Não é enfeite com
+        rótulo: Prumo pende, Mola salta, Relógio anda de segundo em segundo,
+        Eco deixa um fantasma atrás.</p>
+        <p><b>A aparência não muda nada no jogo.</b> A colisão é sempre o mesmo
+        círculo, qualquer que seja a forma — senão você escolheria a roupa mais
+        estreita em vez da que gosta.</p>
+        <p>Vinte e uma vêm dos metros somados de todas as corridas, oito de
+        proezas, e a Avesso já vem vestida. No vestiário as travadas aparecem
+        com nome, silhueta e a condição escrita.</p>
+        <ul class="guia__roupas" id="ajRoupas"></ul>
+      </section>
+
+      <section class="guia__bloco">
+        <h2 class="guia__t">Teclas</h2>
+        <dl class="guia__teclas">
+          <dt>Segurar</dt><dd><kbd>Espaço</kbd> <kbd>&uarr;</kbd> <kbd>W</kbd>, clique ou toque</dd>
+          <dt>Pausar</dt><dd><kbd>Esc</kbd> <kbd>P</kbd>, e ao trocar de aba</dd>
+          <dt>Recomeçar</dt><dd>o mesmo botão de segurar</dd>
+        </dl>
+      </section>
+
+    </div>
+
+    <button class="botao botao--fantasma" id="btAjudaFechar" type="button">Voltar</button>
   </section>
 
   <section class="tela tela--vestiario" id="vestiario" hidden aria-labelledby="vestSelo">

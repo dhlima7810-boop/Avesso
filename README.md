@@ -360,3 +360,28 @@ Pages, aponte para a raiz do repositório e pronto.
 A única coisa que vem de fora é a fonte (Space Grotesk, pelo Google Fonts).
 Sem ela a página cai na fonte do sistema e continua inteira — o jogo em si
 não depende de nada remoto, porque o GSAP viaja em `vendor/`.
+
+## A tela "Como se joga"
+
+No menu, ao lado de **Inverter a tela** e **Som**, há um botão com uma
+interrogação que abre uma tela explicando o jogo inteiro: o botão, a
+inversão, **a roçada**, os três atos, os desafios, a marca do recorde, as 30
+roupas (com a frase do movimento de cada uma) e as teclas.
+
+Ela existe porque o **dono do projeto jogou sem saber o que era roçar**. Se
+quem pediu a mecânica não entendeu jogando, ninguém ia entender.
+
+**Os números da explicação são lidos do próprio código** — `A.rocada`,
+`A.rocadaRente`, `A.multMax`, a tabela `ATOS` e a lista de personagens. Texto
+parado vira texto errado: mexer no ajuste não pode deixar a explicação
+mentindo.
+
+A frase de cada roupa mora no campo `diz`, em `personagens.js`, ao lado do
+`mov` que ela descreve. Trocou o movimento, troque a frase na mesma linha.
+
+## A corrente, no rodapé
+
+O multiplicador da roçada aparece na **faixa do chão**, à esquerda, enquanto
+a corrente está viva. Ali embaixo nada passa por cima dele, e ele fica longe
+do placar — que mora na faixa do teto. Antes ele era uma palavra miúda na
+linha do recorde, e se perdia.

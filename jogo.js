@@ -1353,6 +1353,7 @@
     el.mult.hidden = true;
     C.estado = 'jogando';
     abrir(el.hud);
+    abrir(el.hudPe);
   }
 
   function morrer() {
@@ -1407,6 +1408,7 @@
     esperar(0.55, function () {
       if (C.estado !== 'morto') return;
       fechar(el.hud);
+      fechar(el.hudPe);
       abrir(el.fim);
       C.podeReiniciar = true;
       if (novas.length) SONS.roupa();
@@ -1420,7 +1422,8 @@
     C.fFaixa = ATOS[0].fFaixa;
     limparMundo();
     atualizarMenu();
-    fechar(el.hud); fechar(el.fim); fechar(el.pausa); fechar(el.vestiario); fechar(el.largada);
+    fechar(el.hud); fechar(el.hudPe); fechar(el.fim); fechar(el.pausa);
+    fechar(el.vestiario); fechar(el.largada); fechar(el.ajuda);
     abrir(el.inicio);
   }
 
@@ -1678,6 +1681,67 @@
     }
   }
 
+  // A tela de ajuda le os numeros do proprio jogo em vez de repeti-los na
+  // mao: mexer em A.rocada ou na tabela ATOS nao pode deixar a explicacao
+  // mentindo. Texto parado vira texto errado.
+  function montarAjuda() {
+    el.ajRocada.textContent = A.rocada;
+    el.ajRente.textContent = A.rocadaRente;
+    el.ajMult.textContent = A.multMax;
+    el.ajQuantas.textContent = P.length;
+
+    el.ajAtos.textContent = '';
+    for (var i = 0; i < ATOS.length; i++) {
+      var li = document.createElement('li');
+      li.className = 'guia__ato';
+
+      var c = document.createElement('span');
+      c.className = 'ato__ponto';
+      c.style.background = ATOS[i].cor;
+      li.appendChild(c);
+
+      var n = document.createElement('b');
+      n.textContent = ATOS[i].nome;
+      li.appendChild(n);
+
+      var f = document.createElement('span');
+      f.textContent = (i ? ATOS[i - 1].ate : 0) + '–' +
+        (i < ATOS.length - 1 ? ATOS[i].ate : LIMITES[LIMITES.length - 1]) +
+        ' m · ' + ATOS[i].dif;
+      li.appendChild(f);
+
+      el.ajAtos.appendChild(li);
+    }
+
+    el.ajRoupas.textContent = '';
+    for (var j = 0; j < P.length; j++) {
+      var r = document.createElement('li');
+      r.className = 'guia__roupa';
+
+      var nn = document.createElement('b');
+      nn.textContent = P[j].nome;
+      r.appendChild(nn);
+
+      var dd = document.createElement('span');
+      dd.textContent = P[j].diz || '';
+      r.appendChild(dd);
+
+      el.ajRoupas.appendChild(r);
+    }
+  }
+
+  function abrirAjuda() {
+    montarAjuda();
+    fechar(el.inicio);
+    abrir(el.ajuda);
+  }
+
+  function fecharAjuda() {
+    fechar(el.ajuda);
+    atualizarMenu();
+    abrir(el.inicio);
+  }
+
   function atualizarMenu() {
     el.recorde.textContent = C.recorde;
     el.somaTotal.textContent = C.total;
@@ -1708,10 +1772,11 @@
       if (e.repeat) return;
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         e.preventDefault();
-        if (!el.vestiario.hidden) return;   // no vestiario o espaco nao joga
+        if (!el.vestiario.hidden || !el.ajuda.hidden) return;   // ali o espaco nao joga
         apertou();
       } else if (e.code === 'Escape' || e.code === 'KeyP') {
         if (!el.vestiario.hidden) { fecharVestiario(); return; }
+        if (!el.ajuda.hidden) { fecharAjuda(); return; }
         if (C.estado === 'jogando') pausar();
         else if (C.estado === 'pausado') despausar();
       }
@@ -1723,7 +1788,7 @@
 
     el.palco.addEventListener('pointerdown', function (e) {
       if (e.target.closest('button, label, input, a')) return;
-      if (!el.vestiario.hidden) return;
+      if (!el.vestiario.hidden || !el.ajuda.hidden) return;
       e.preventDefault();
       apertou();
     });
@@ -1742,6 +1807,8 @@
     el.btVestiario.addEventListener('click', abrirVestiario);
     el.btVestiario2.addEventListener('click', abrirVestiario);
     el.btVestFechar.addEventListener('click', fecharVestiario);
+    el.btAjuda.addEventListener('click', abrirAjuda);
+    el.btAjudaFechar.addEventListener('click', fecharAjuda);
 
     el.grade.addEventListener('click', function (e) {
       var b = e.target.closest('.peca');
@@ -1813,7 +1880,9 @@
   function pegar() {
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
       'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
-      'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos',
+      'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos', 'hudPe',
+      'ajuda', 'btAjuda', 'btAjudaFechar', 'ajRocada', 'ajRente', 'ajMult',
+      'ajQuantas', 'ajAtos', 'ajRoupas',
       'btJogar', 'btDeNovo', 'btMenu', 'btVoltar', 'btSair', 'btVestiario', 'btVestiario2',
       'btVestFechar', 'fimPlacar', 'fimSelo', 'fimLinha', 'recorde', 'somaTotal', 'vestCont',
       'optInverter', 'optSom', 'novidade', 'novidadeLista', 'barra', 'barraTexto', 'barraCheio'];

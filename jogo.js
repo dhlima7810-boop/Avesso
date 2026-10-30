@@ -710,8 +710,10 @@
       j = Math.floor(Math.random() * (i + 1));
       t = pool[i]; pool[i] = pool[j]; pool[j] = t;
     }
-    // sempre um facil, um medio e um dificil, nessa ordem: a partida ganha
-    // uma meta que quase sempre se cumpre e uma que quase nunca
+    // Sempre um facil, um medio e um dificil, NESSA ORDEM — a posicao na
+    // lista e o nivel, e o CSS pinta o laranja mais forte conforme desce.
+    // A partida ganha uma meta que quase sempre se cumpre e uma que quase
+    // nunca.
     var fora = [];
     for (i = 0; i < 3; i++) {
       fora.push({ d: pool[i], alvo: pool[i].alvos[i], premio: pool[i].premios[i], feito: false });
@@ -1525,7 +1527,12 @@
     for (var i = 0; i < lista.length; i++) {
       var x = lista[i];
       var li = document.createElement('li');
-      li.className = 'meta' + (comResultado ? (x.feito ? ' meta--feita' : ' meta--perdida') : '');
+      // A posicao E o nivel: sortearDesafios da ao primeiro o alvo mais
+      // baixo de cada tipo, ao segundo o do meio e ao terceiro o mais alto.
+      // A classe leva isso para o CSS, que acende o laranja mais forte
+      // quanto mais dificil for o desafio.
+      li.className = 'meta meta--n' + (i + 1) +
+        (comResultado ? (x.feito ? ' meta--feita' : ' meta--perdida') : '');
 
       // A barra enche ate onde a corrida chegou. Sem ela, um desafio perdido
       // por um obstaculo e um perdido por dez ficavam iguais na tela.

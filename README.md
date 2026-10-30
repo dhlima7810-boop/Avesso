@@ -242,6 +242,18 @@ chegou**, e no lugar do ponto aparece **o que faltou**: `−6`, `−110`,
 `−2,4k`. Um desafio perdido por um obstáculo e um perdido por dez ficavam
 iguais na tela; agora não ficam.
 
+**A posição é o nível.** O sorteio dá ao primeiro desafio o alvo mais baixo
+do seu tipo, ao segundo o do meio e ao terceiro o mais alto — sempre fácil,
+médio, difícil, nessa ordem. Isso já era verdade no código; o que faltava era
+aparecer.
+
+**O laranja sobe a cada nível**: `.12` de fundo no fácil, `.21` no médio e
+`.33` no difícil, com a linha d'água em `.42`, `.68` e `.98`. Na largada
+ainda não há barra, então quem mostra o nível é o número da posição, na mesma
+escada. É a única pista de dificuldade que não precisa de texto.
+
+O cumprido continua no acento, qualquer que seja o nível: feito é feito.
+
 **O preenchimento é laranja** (`--laranja`, o mesmo da faísca e da Forja) —
 um degrau abaixo do acento, que fica reservado para o desafio **cumprido**.
 Assim a cor já diz, de relance, o que caiu e o que faltou.

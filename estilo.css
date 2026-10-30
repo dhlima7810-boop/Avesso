@@ -450,6 +450,26 @@ kbd{
   background:rgba(255,59,20,.15);
   border-right-color:var(--acento);
 }
+
+/* O LARANJA SOBE COM O NIVEL. A posição na lista é a dificuldade — fácil,
+   médio, difícil —, então o preenchimento do terceiro é bem mais forte que
+   o do primeiro. É a única pista de dificuldade que não precisa de texto.
+   O cumprido continua no acento, qualquer que seja o nível: feito é feito. */
+.meta--n1 .meta__cheio{background:rgba(255,122,26,.12);border-right-color:rgba(255,122,26,.42)}
+.meta--n2 .meta__cheio{background:rgba(255,122,26,.21);border-right-color:rgba(255,122,26,.68)}
+.meta--n3 .meta__cheio{background:rgba(255,122,26,.33);border-right-color:rgba(255,122,26,.98)}
+
+.meta--feita.meta--n1 .meta__cheio,
+.meta--feita.meta--n2 .meta__cheio,
+.meta--feita.meta--n3 .meta__cheio{
+  background:rgba(255,59,20,.15);border-right-color:var(--acento);
+}
+
+/* Na largada ainda não há barra, então quem mostra o nível é o número da
+   posição: o mesmo laranja, na mesma escada. */
+.metas:not(.metas--fim) .meta--n1 .meta__marca{color:rgba(255,122,26,.5)}
+.metas:not(.metas--fim) .meta--n2 .meta__marca{color:rgba(255,122,26,.75)}
+.metas:not(.metas--fim) .meta--n3 .meta__marca{color:var(--laranja)}
 .metas--fim .meta__marca,
 .metas--fim .meta__texto,
 .metas--fim .meta__premio{position:relative}

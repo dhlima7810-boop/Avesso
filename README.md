@@ -242,6 +242,16 @@ chegou**, e no lugar do ponto aparece **o que faltou**: `−6`, `−110`,
 `−2,4k`. Um desafio perdido por um obstáculo e um perdido por dez ficavam
 iguais na tela; agora não ficam.
 
+**O preenchimento é laranja** (`--laranja`, o mesmo da faísca e da Forja) —
+um degrau abaixo do acento, que fica reservado para o desafio **cumprido**.
+Assim a cor já diz, de relance, o que caiu e o que faltou.
+
+**Encostar traz o desafio para a frente**: a linha cresce 4,5%, ganha borda
+laranja e uma sombra por baixo, e passa na frente das vizinhas. Hover que
+move segue os 0.6s do projeto; a cor e a borda ficam em 0.25s. Em tela de
+toque não há ponteiro, então `:active` cobre o dedo apoiado, e sob
+`prefers-reduced-motion` a linha não se move — só a borda muda.
+
 **A linha d'água é o que faz a barra ler como barra.** Sem a borda na ponta,
 o preenchimento parecia uma etiqueta atrás do número — em 11% ele terminava
 bem na borda do `−890` e virava uma caixinha. A borda é o que diz "cheguei

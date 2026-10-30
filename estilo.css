@@ -10,6 +10,8 @@
   --tinta:#0c0d10;
   --osso:#edeae3;
   --acento:#ff3b14;
+  /* o laranja da faísca e da Forja: a cor de um degrau abaixo do acento */
+  --laranja:#ff7a1a;
   --fio:rgba(237,234,227,.18);
   --fio-forte:rgba(237,234,227,.34);
   --display:'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -401,19 +403,47 @@ kbd{
   font-variant-numeric:tabular-nums;
 }
 
-.metas--fim .meta{padding:8px 13px;position:relative;overflow:hidden}
+.metas--fim .meta{
+  padding:8px 13px;position:relative;overflow:hidden;
+  /* Hover que MOVE segue os 0.6s do projeto; cor e borda ficam em 0.25s.
+     Com expo.out quase todo o deslocamento sai no primeiro terço, então
+     0.6s ainda responde na hora. */
+  transition:transform .6s var(--saida),
+             box-shadow .6s var(--saida),
+             border-color .25s var(--saida),
+             background-color .25s var(--saida);
+}
+
+/* Encostar traz o desafio para a frente, na direção de quem olha. Em tela de
+   toque não há ponteiro, então `:active` cobre o dedo apoiado. */
+.metas--fim .meta:hover,
+.metas--fim .meta:active{
+  transform:scale(1.045);
+  z-index:2;
+  border-color:var(--laranja);
+  background:rgba(255,122,26,.05);
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+.metas--fim .meta--feita:hover,
+.metas--fim .meta--feita:active{border-color:var(--acento)}
+
+@media (prefers-reduced-motion:reduce){
+  .metas--fim .meta{transition:border-color .25s var(--saida)}
+  .metas--fim .meta:hover,
+  .metas--fim .meta:active{transform:none;box-shadow:none}
+}
 
 /* A barra que enche ate onde a corrida chegou. Fica ATRAS do texto, e por
    isso os tres filhos precisam de position:relative — senao o preenchimento
    passa por cima e o desafio fica ilegivel. */
 .meta__cheio{
   position:absolute;left:0;top:0;bottom:0;width:0;
-  background:rgba(237,234,227,.09);
+  background:rgba(255,122,26,.16);
   /* A LINHA D'AGUA. Sem ela o preenchimento lê como uma etiqueta atrás do
      número, e não como um nível: em 11% ele terminava bem na borda do
      "−888" e parecia uma caixinha. A borda da ponta é o que diz "cheguei
      até aqui". */
-  border-right:2px solid rgba(237,234,227,.38);
+  border-right:2px solid rgba(255,122,26,.62);
   pointer-events:none;
 }
 .meta--feita .meta__cheio{

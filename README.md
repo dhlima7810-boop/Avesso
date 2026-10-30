@@ -205,13 +205,13 @@ apagava o primeiro antes de dar tempo de ler.
 
 ### Roupas
 
-São **30**, e cada uma é uma linha de dados em `personagens.js`, não um
+São **31**, e cada uma é uma linha de dados em `personagens.js`, não um
 desenho: forma × casca × cor × rastro × **movimento**.
 
 **O nome é o movimento.** Prumo pende, Mola salta, Relógio anda de segundo em
-segundo, Espelho se inverte, Eco deixa um fantasma atrás, Bússola aponta para
-onde a gravidade puxa, Hélice gira mais rápido quanto mais rápido se cai. São
-30 movimentos, um por roupa. Se um dia o movimento mudar, o nome muda junto —
+segundo, Espelho se inverte, Eco flutua deixando três fantasmas atrás,
+Bússola aponta para onde a gravidade puxa, Hélice gira mais rápido quanto
+mais rápido se cai. São 31 movimentos, um por roupa. Se um dia o movimento mudar, o nome muda junto —
 nome que não descreve o que se vê é só rótulo.
 
 **Movimento não é física.** Nada em `MOVS` mexe na colisão: ela continua sendo
@@ -220,18 +220,36 @@ o mesmo círculo de raio `A.raio` no centro de onde o disco está de verdade.
 esticasse a caixa faria a pessoa escolher a mais estreita, e o jogo deixaria
 de ser sobre conduzir para ser sobre escolher bem no armário.
 
-**No vestiário os 30 cartões se mexem**, cada um do seu jeito, com um estado
+**No vestiário os 31 cartões se mexem**, cada um do seu jeito, com um estado
 de mentira que inverte a gravidade a cada 1,2s. Cartão parado não conta o que
-a roupa é. Medido: 30 quadros distintos entre si, de 30.
+a roupa é.
 
 - **15 por metros somados** de todas as corridas, de **500 m a 92.000 m**. A
   soma nunca anda para trás: uma corrida ruim ainda aproxima da próxima.
-- **14 por proeza.** Metade do armário sai daqui, e é de propósito: moer
+- **15 por proeza.** Metade do armário sai daqui, e é de propósito: moer
   metros desbloqueia o começo, mas as roupas que valem a pena caçar pedem
   domínio — roçar cinco vezes bem rente, passar 30 obstáculos seguidos sem
   roçar, cumprir os três desafios da mesma corrida, 60 segundos vivo, 25
   obstáculos sem tocar nas bordas, passar dos 4.000 m.
-- **1 de saída**, a Avesso.
+- **1 de saída**, a Giro — um disco cinza que dá meia volta a cada inversão.
+  Nome fraco de propósito: é a primeira, e a graça está nas outras.
+
+**A última casa é a do Avesso**, a 31ª, e ela toma a fileira inteira do
+armário. Metade do corpo dela é pintada com a **cor de fundo do mundo**, que
+inverte quando se segura o botão: metade dela é literalmente o mundo do outro
+lado. Um anel interno anda ao contrário do corpo e um satélite corre para o
+lado para onde a gravidade passou a puxar — é a única roupa que responde ao
+dedo e à cor da tela ao mesmo tempo. A meta dela é a mais dura que existe
+aqui: **levar a roçada a ×8 e cumprir os três desafios na mesma corrida**.
+
+**O Eco é um fantasma, e isso é desenho, não legenda.** Ele era um disco com
+um eco fraco atrás, e quem não lesse a frase na ajuda nunca saberia o que
+era. Agora tem silhueta própria (cabeça redonda, barra em conchas embaixo,
+dois olhos na cor do fundo) e **três** fantasmas enfileirados atrás, cada um
+mais apagado, menor e com o tempo atrasado em 0,09s — é o atraso que faz o
+rastro ler como fantasma em vez de cópia carbono. E ele **não vira** com a
+gravidade: de cabeça para baixo a silhueta deixa de se ler como fantasma, que
+é a única coisa que essa roupa precisa fazer.
 
 A ordem no armário é a da dificuldade: as duas primeiras fileiras e um pedaço
 da terceira são metros somados; da metade da terceira em diante, só proezas.
@@ -241,10 +259,19 @@ régua e a curva já mudaram três vezes; sem esse registro, cada mudança
 **tiraria do armário** uma roupa que a pessoa já tinha — a pior coisa que uma
 coleção pode fazer. `avesso.regua` diz qual régua gerou os números no disco, e
 cada mudança passa o que está guardado pela mesma conta. Medido nas três
-gerações de save: quem tinha 6 de 30 continua com 6 de 30.
+gerações de save: quem tinha 6 de 30 continua com 6 de 30, e quem tinha as 30
+antigas abre o armário novo com 30 de 31 — só o Avesso nasce travado.
 
 **Os `id` não mudam nunca**: é por eles que o armário lembra. Nome, forma, cor
-e movimento podem mudar.
+e movimento podem mudar. Foi assim que a roupa de saída virou **Giro** sem
+tirar nada de ninguém: ela se chamava Avesso, o nome passou para a 31ª, e o
+`id` dela continua sendo `avesso`.
+
+**A tela de fim anuncia as roupas de proeza.** As proezas são conferidas a
+cada quadro, então no instante da morte já estavam marcadas, e a comparação
+"o que eu tinha antes" feita ali dava sempre vazio: medido, **nenhuma** das
+roupas de proeza aparecia como roupa nova. A foto do que se tinha passou a
+ser tirada na largada, e quem revive não vê o anúncio duas vezes.
 
 **A cor não é livre.** A tela inverte, então a cor precisa contrastar com o
 preto **e** com o osso: em brilho percebido, ficar entre 68 e 180. Há um teste
@@ -361,7 +388,7 @@ cai se dali em diante não vier mais bônus nenhum.
 |---|---|
 | `index.html` | A página. Carrega o GSAP de `vendor/`, nada de CDN |
 | `estilo.css` | Só a interface por cima do canvas |
-| `personagens.js` | As 30 roupas, em dados. É aqui que se acrescenta uma |
+| `personagens.js` | As 31 roupas, em dados. É aqui que se acrescenta uma |
 | `jogo.js` | Motor: medida, setores, mundo, física, roçada, desenho, telas |
 
 ## As decisões que não são óbvias
@@ -478,8 +505,8 @@ não depende de nada remoto, porque o GSAP viaja em `vendor/`.
 
 No menu, ao lado de **Inverter a tela** e **Som**, há um botão com uma
 interrogação que abre uma tela explicando o jogo inteiro: o botão, a
-inversão, **a roçada**, os três atos, os desafios, a marca do recorde, as 30
-roupas (com a frase do movimento de cada uma) e as teclas.
+inversão, **a roçada**, os três atos, os desafios, a marca do recorde, as 31
+roupas e as teclas.
 
 Ela existe porque o **dono do projeto jogou sem saber o que era roçar**. Se
 quem pediu a mecânica não entendeu jogando, ninguém ia entender.
@@ -488,6 +515,13 @@ quem pediu a mecânica não entendeu jogando, ninguém ia entender.
 `A.rocadaRente`, `A.multMax`, a tabela `ATOS` e a lista de personagens. Texto
 parado vira texto errado: mexer no ajuste não pode deixar a explicação
 mentindo.
+
+**Cada roupa da lista diz as duas coisas**: o que ela faz e **por onde ela
+vem** — "de saída", "25.000 m somados" ou a proeza escrita por extenso. A
+lista dizia só o movimento, e quem queria ir atrás de uma roupa tinha de
+abrir o vestiário para descobrir como ganhá-la. O texto vem de
+`comoSeGanha()`, o mesmo que serve os cartões do armário, então nunca
+discorda deles.
 
 A frase de cada roupa mora no campo `diz`, em `personagens.js`, ao lado do
 `mov` que ela descreve. Trocou o movimento, troque a frase na mesma linha.

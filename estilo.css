@@ -343,6 +343,19 @@ kbd{
 .peca--vestida{border-color:var(--acento);background:rgba(255,59,20,.08)}
 .peca--vestida .peca__como{color:var(--acento)}
 
+/* a ultima casa, a do Avesso: a fileira inteira, deitada, com a figura
+   maior. E o fim do armario, e o unico cartao que se anuncia */
+.peca--coroa{
+  grid-column:1 / -1;
+  display:grid;grid-template-columns:auto 1fr;align-items:center;
+  gap:2px 18px;padding:14px 18px;text-align:left;
+  border-color:var(--fio-forte);
+  background:linear-gradient(90deg,rgba(255,59,20,.09),rgba(237,234,227,.03));
+}
+.peca--coroa .peca__fig{width:76px;height:76px;grid-row:1 / 3}
+.peca--coroa .peca__nome{font-size:15px;letter-spacing:.14em;align-self:end}
+.peca--coroa .peca__como{align-self:start;max-width:34ch}
+
 .peca--trava{cursor:default;background:transparent;border-style:dashed}
 .peca--trava .peca__nome{color:rgba(237,234,227,.28)}
 .peca--trava .peca__fig{opacity:.75}
@@ -558,17 +571,24 @@ kbd{
 .guia__roupas{
   list-style:none;margin:4px 0 0;padding:0;
   display:grid;gap:5px 18px;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
 }
+/* nome na primeira coluna, o que ela faz e como se ganha na segunda, uma
+   embaixo da outra: em linha unica a terceira parte empurrava a lista para
+   duas colunas largas demais para ler */
 .guia__roupa{
-  display:flex;align-items:baseline;gap:8px;
+  display:grid;grid-template-columns:7.5em 1fr;gap:0 10px;
   font-size:clamp(11px,1.15vw,13px);line-height:1.45;
 }
 .guia__roupa b{
-  flex:none;min-width:6.6em;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;
 }
 .guia__roupa span{color:rgba(237,234,227,.5)}
+.guia__por{
+  grid-column:2;font-style:normal;
+  font-size:.86em;letter-spacing:.05em;text-transform:uppercase;
+  color:rgba(237,234,227,.34);
+}
 
 .guia__teclas{
   margin:0;display:grid;gap:7px 14px;

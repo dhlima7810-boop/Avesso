@@ -1,9 +1,10 @@
 /* ===========================================================================
-   AVESSO — as 30 roupas.
+   AVESSO — as 31 roupas.
 
    Cada uma e uma LINHA DE DADOS, nao um desenho. Seis eixos se combinam:
 
      forma   disco · quadrado · losango · hexagono · triangulo · capsula · cruz
+             · fantasma (o Eco) · avesso (so a 31a)
      casca   solido · vazado (so contorno) · anel (furo no meio) · partido
      cor     paleta de luminancia media
      rastro  bolhas · risco · pontos · nenhum
@@ -12,8 +13,8 @@
      por     como se ganha
 
    O NOME E O MOVIMENTO SAO A MESMA COISA. Prumo pende, Mola salta, Relogio
-   anda de segundo em segundo, Espelho se inverte, Eco deixa um fantasma
-   atras. Se um dia o movimento mudar, o nome muda junto — nome que nao
+   anda de segundo em segundo, Espelho se inverte, Eco flutua deixando tres
+   fantasmas atras. Se um dia o movimento mudar, o nome muda junto — nome que nao
    descreve o que se ve e so rotulo.
 
    MOVIMENTO NAO E FISICA. Nada aqui mexe na colisao: ela continua sendo o
@@ -41,7 +42,9 @@ window.AVESSO_CORTES_ANTIGOS = [120, 300, 550, 850, 1200, 1600, 2050, 2550, 3100
   5200, 6100, 7100, 8200, 9400, 10700, 12100, 13600, 15200, 17500];
 
 window.AVESSO_PERSONAGENS = [
-  { id:'avesso',   nome:'Avesso',     forma:'disco',     casca:'solido',  cor:'#ff3b14', rastro:'bolhas', mov:'vira',    diz:'dá meia volta a cada inversão', por:{ tipo:'livre' } },
+  // A de saida. Chamou-se Avesso ate a 31a roupa chegar e tomar o nome do
+  // jogo; o `id` ficou, senao o armario esqueceria quem ja a tinha vestida.
+  { id:'avesso',   nome:'Giro',       forma:'disco',     casca:'solido',  cor:'#8f949c', rastro:'bolhas', mov:'vira',    diz:'dá meia volta a cada inversão', por:{ tipo:'livre' } },
 
   { id:'brasa',    nome:'Brasa',      forma:'disco',     casca:'anel',    cor:'#ff6a2b', rastro:'risco',  mov:'pulsa',   diz:'pulsa como uma brasa respirando', por:{ tipo:'soma', m:500 } },
   { id:'cal',      nome:'Prumo',      forma:'losango',   casca:'solido',  cor:'#a8aab0', rastro:'risco',  mov:'pende',   diz:'pende para o lado da queda, como um fio de prumo', por:{ tipo:'soma', m:1200 } },
@@ -63,7 +66,7 @@ window.AVESSO_PERSONAGENS = [
   { id:'folego',   nome:'Sopro',      forma:'disco',     casca:'vazado',  cor:'#46b06b', rastro:'risco',  mov:'respira', diz:'cresce e encolhe devagar', por:{ tipo:'proeza', id:'folego' } },
   { id:'giz',      nome:'Serra',      forma:'hexagono',  casca:'vazado',  cor:'#a8a394', rastro:'bolhas', mov:'serra',   diz:'gira aos trancos, como uma serra', por:{ tipo:'proeza', id:'rente' } },
   { id:'lasca',    nome:'Lasca',      forma:'triangulo', casca:'vazado',  cor:'#c9a44a', rastro:'risco',  mov:'lasca',   diz:'tomba de repente, de vez em quando', por:{ tipo:'proeza', id:'limpao' } },
-  { id:'breu',     nome:'Eco',        forma:'disco',     casca:'solido',  cor:'#5a4a6e', rastro:'nenhum', mov:'repete',  diz:'deixa um fantasma atrás', por:{ tipo:'proeza', id:'tres' } },
+  { id:'breu',     nome:'Eco',        forma:'fantasma',  casca:'solido',  cor:'#6f5c88', rastro:'nenhum', mov:'repete',  diz:'flutua deixando três fantasmas atrás', por:{ tipo:'proeza', id:'tres' } },
   { id:'nespera',  nome:'Mola',       forma:'capsula',   casca:'anel',    cor:'#d9663f', rastro:'pontos', mov:'salta',   diz:'dá um tranco e volta, a cada inversão', por:{ tipo:'proeza', id:'maratona' } },
   { id:'chumbo',   nome:'Âncora',     forma:'cruz',      casca:'partido', cor:'#6b7079', rastro:'nenhum', mov:'afunda',  diz:'atrasa para o lado da queda, pesada', por:{ tipo:'proeza', id:'voo25' } },
   { id:'lilas',    nome:'Pluma',      forma:'losango',   casca:'vazado',  cor:'#9b6bd6', rastro:'risco',  mov:'flutua',  diz:'vagueia solta no ar', por:{ tipo:'proeza', id:'voo' } },
@@ -72,5 +75,10 @@ window.AVESSO_PERSONAGENS = [
   { id:'cegas',    nome:'Espelho',    forma:'quadrado',  casca:'partido', cor:'#8f8f8f', rastro:'nenhum', mov:'reflete', diz:'se inverte de tempos em tempos', por:{ tipo:'proeza', id:'cegas' } },
   { id:'estopim',  nome:'Faísca',     forma:'losango',   casca:'solido',  cor:'#ff5a3c', rastro:'pontos', mov:'pisca',   diz:'pisca rápido', por:{ tipo:'proeza', id:'quatroMil' } },
   { id:'vidro',    nome:'Vulto',      forma:'disco',     casca:'vazado',  cor:'#4fb3c9', rastro:'nenhum', mov:'some',    diz:'aparece e some devagar', por:{ tipo:'proeza', id:'duzentos' } },
-  { id:'limalha',  nome:'Ímã',        forma:'capsula',   casca:'anel',    cor:'#b0a08c', rastro:'pontos', mov:'atrai',   diz:'puxa para o lado da gravidade', por:{ tipo:'proeza', id:'limalha' } }
+  { id:'limalha',  nome:'Ímã',        forma:'capsula',   casca:'anel',    cor:'#b0a08c', rastro:'pontos', mov:'atrai',   diz:'puxa para o lado da gravidade', por:{ tipo:'proeza', id:'limalha' } },
+
+  // A 31a, e a unica que leva o nome do jogo. Metade do corpo dela e pintada
+  // com a cor de FUNDO do mundo, entao ela vira pelo avesso junto com a tela.
+  // E a ultima casa do armario e a meta mais dura que existe aqui.
+  { id:'oavesso',  nome:'Avesso',     forma:'avesso',    casca:'solido',  cor:'#ff3b14', rastro:'bolhas', mov:'avessa',  diz:'metade dela é o mundo do outro lado, e ela se vira a cada inversão', por:{ tipo:'proeza', id:'avessado' } }
 ];

@@ -157,7 +157,11 @@
                             return { a: k > 0 ? 1 : 0.38, ex: 1 + k * 0.11, ey: 1 + k * 0.11 }; },
     serra:   function (e) { return { r: Math.floor(e.t * 14) * (6.2832 / 14) }; },
     lasca:   function (e) { return { r: Math.sin(Math.floor(e.t * 2.2) * 91.7) * 0.55 }; },
-    repete:  function ()  { return { eco: true }; },
+    // tres fantasmas atras e um flutuar que nenhuma outra roupa tem:
+    // fantasma nao anda, paira. Ele NAO vira com a gravidade de proposito —
+    // de cabeca para baixo a silhueta deixa de se ler como fantasma, que e a
+    // unica coisa que esta roupa precisa fazer.
+    repete:  function (e) { return { eco: 3, dy: Math.sin(e.t * 2.2) * e.raio * 0.22 }; },
     salta:   function (e) {
       var t = Math.min(1, (e.t - e.virou) / 0.45);
       var k = Math.exp(-t * 7) * Math.cos(t * 26) * 0.3;
@@ -170,7 +174,22 @@
     reflete: function (e) { return { ex: Math.sin(e.t * 2.4) > 0 ? 1 : -1 }; },
     respira: function (e) { var k = 1 + Math.sin(e.t * 1.5) * 0.17; return { ex: k, ey: k }; },
     risca:   function (e) { return { ex: 1.38, ey: 0.78, r: Math.atan2(e.vy, 1400) }; },
-    atrai:   function (e) { return { dy: (e.segurando ? -1 : 1) * (0.5 + 0.5 * Math.sin(e.t * 7)) * e.raio * 0.42 }; }
+    atrai:   function (e) { return { dy: (e.segurando ? -1 : 1) * (0.5 + 0.5 * Math.sin(e.t * 7)) * e.raio * 0.42 }; },
+
+    // A 31a. Tres coisas ao mesmo tempo, e as tres saem do mesmo gesto: o
+    // corpo da meia volta a cada inversao (e com ele a metade que e o mundo),
+    // o anel interno anda ao contrario, e o satelite corre para o lado para
+    // onde a gravidade passou a puxar. Esmaga no instante da virada, que e
+    // onde o movimento precisa ter peso.
+    avessa:  function (e) {
+      var t = Math.min(1, (e.t - e.virou) / 0.3), f = 1 - Math.pow(1 - t, 3);
+      var de = e.segurando ? 0 : Math.PI, ate = e.segurando ? Math.PI : 0;
+      var k = Math.exp(-t * 6) * Math.cos(t * 19) * 0.22;
+      var sde = e.segurando ? 1.5708 : -1.5708, sate = -sde;
+      return { r: de + (ate - de) * f, ex: 1 - k, ey: 1 + k,
+               anel: -(de + (ate - de) * f) * 1.6 - e.t * 0.9,
+               sat: sde + (sate - sde) * f };
+    }
   };
 
   var COR_FAISCA = '#ff7a1a';   // brilho 148: aparece no preto e no osso
@@ -239,7 +258,10 @@
     cegas:     'Fazer 400 m com a inversão da tela desligada',
     quatroMil: 'Passar dos 4.000 m numa corrida',
     duzentos:  'Chegar a 1.500 m numa corrida',
-    limalha:   'Roçar 35 vezes numa única corrida'
+    limalha:   'Roçar 35 vezes numa única corrida',
+    // a mais dura de todas, e de proposito: e a que paga a roupa que leva o
+    // nome do jogo. Pede dominio da rocada E as tres metas na mesma corrida.
+    avessado:  'Levar a roçada a ×8 e cumprir os três desafios na mesma corrida'
   };
 
   /* §2 — estado ---------------------------------------------------------- */
@@ -261,7 +283,7 @@
     desafios: [], premioDesafios: 0,
     revives: 0, carga: 0, carregando: false, custoRev: 0, creditado: 0, brilho: 0,
     cargaT0: 0, cargaSolta: 0, soltaT0: 0,
-    passouRecorde: false, primeiro: true,
+    passouRecorde: false, primeiro: true, antesDaCorrida: null,
     recorde: 0, total: 0,
     proezas: {}, ganhas: {}, vestido: 'avesso',
     inverter: true, som: true,
@@ -793,6 +815,10 @@
       var fe = 0;
       for (var i = 0; i < 3; i++) if (C.desafios[i].feito) fe++;
       if (fe === 3) marcar('tres');
+      // o Avesso: as tres metas E a roçada no topo, na mesma corrida.
+      // C.maxMult, e nao C.mult, porque o multiplicador do instante ja pode
+      // ter zerado numa passagem folgada antes da morte.
+      if (fe === 3 && C.maxMult >= A.multMax) marcar('avessado');
     }
   }
 
@@ -913,6 +939,21 @@
         ctx.moveTo(r * 1.3, 0); ctx.lineTo(-r * 0.88, -r * 1.08);
         ctx.lineTo(-r * 0.88, r * 1.08); ctx.closePath(); break;
       case 'capsula': ctx.ellipse(0, 0, r * 1.32, r * 0.78, 0, 0, 6.2832); break;
+      // o Eco: cabeca redonda e barra ondulada embaixo. A silhueta e o que
+      // faz a pessoa ver fantasma sem ler a frase da ajuda.
+      case 'fantasma':
+        var rr = r * 0.92, pe = r * 0.80, ond = r * 0.34, n = 3, pa = (rr * 2) / n;
+        ctx.arc(0, -r * 0.16, rr, Math.PI, 0);       // a cabeca, meia volta
+        ctx.lineTo(rr, pe);
+        for (i = 0; i < n; i++) {                    // a barra, em conchas
+          x = rr - i * pa;
+          ctx.quadraticCurveTo(x - pa * 0.5, pe + ond, x - pa, pe);
+        }
+        ctx.lineTo(-rr, -r * 0.16);
+        ctx.closePath(); break;
+      // a 31a: so o contorno; as duas metades sao pintadas em desenharPeca,
+      // porque uma delas usa a cor do FUNDO e so ela sabe disso
+      case 'avesso': ctx.arc(0, 0, r * 1.06, 0, 6.2832); break;
       case 'cruz':
         var b = r * 0.40, a = r * 1.16;
         ctx.moveTo(-b, -a); ctx.lineTo(b, -a); ctx.lineTo(b, -b); ctx.lineTo(a, -b);
@@ -935,12 +976,20 @@
     var ex = m.ex === undefined ? 1 : m.ex;
     var ey = m.ey === undefined ? 1 : m.ey;
 
+    // `eco` e uma CONTAGEM: um fantasma so passava por borrao. Os de tras
+    // vem com o tempo atrasado, entao cada um chega onde o disco estava, e e
+    // isso que le como rastro de fantasma em vez de copia carbono.
     if (m.eco && !fantasma) {
-      ctx.save();
-      ctx.globalAlpha = 0.32;
-      ctx.translate(-r * 1.6, 0);
-      desenharPeca(ctx, p, r * 0.82, e, fundo, gravCima, true);
-      ctx.restore();
+      for (var k = m.eco; k >= 1; k--) {
+        var atras = {};
+        for (var ch in e) if (e.hasOwnProperty(ch)) atras[ch] = e[ch];
+        atras.t = e.t - k * 0.09;
+        ctx.save();
+        ctx.globalAlpha = 0.34 / k;
+        ctx.translate(-r * 1.35 * k, 0);
+        desenharPeca(ctx, p, r * (1 - k * 0.1), atras, fundo, gravCima, true);
+        ctx.restore();
+      }
     }
 
     ctx.save();
@@ -951,7 +1000,32 @@
     ctx.rotate(m.r || 0);
     ctx.scale(ex, ey);
     caminho(ctx, p.forma, r);
-    if (p.casca === 'vazado') {
+    if (p.forma === 'avesso') {
+      // Metade na cor da roupa, metade na cor do FUNDO do mundo. Como o fundo
+      // inverte quando se segura o botao, metade do corpo dela e o mundo do
+      // outro lado — e e por isso que ela leva o nome do jogo.
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = p.cor; ctx.fillRect(-r * 2, -r * 2, r * 2, r * 4);
+      ctx.fillStyle = fundo; ctx.fillRect(0, -r * 2, r * 2, r * 4);
+      ctx.restore();
+      ctx.lineWidth = r * 0.12; ctx.strokeStyle = p.cor; ctx.stroke();
+      // O anel interno anda ao contrario do corpo: e o que faz a virada se
+      // ver mesmo depois que as duas metades trocaram de lado. Ele e pintado
+      // ao contrario de cada metade, senao some dentro da propria cor.
+      for (var lad = 0; lad < 2; lad++) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(lad ? 0 : -r * 2, -r * 2, r * 2, r * 4);
+        ctx.clip();
+        ctx.rotate((m.anel || 0) - (m.r || 0));
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.52, 0.45, 0.45 + 4.4);
+        ctx.lineWidth = r * 0.17; ctx.lineCap = 'round';
+        ctx.strokeStyle = lad ? p.cor : fundo;
+        ctx.stroke();
+        ctx.restore();
+      }
+    } else if (p.casca === 'vazado') {
       ctx.lineWidth = r * 0.42; ctx.lineJoin = 'round';
       ctx.strokeStyle = p.cor; ctx.stroke();
     } else if (p.casca === 'partido') {
@@ -965,12 +1039,34 @@
     }
     ctx.restore();
 
+    // os olhos do Eco: na cabeca, que fica sempre em cima, e na cor do fundo
+    // como o ponto da gravidade — assim invertem junto com o mundo
+    if (p.forma === 'fantasma') {
+      ctx.fillStyle = fundo;
+      ctx.beginPath(); ctx.arc(-r * 0.35, -r * 0.08, r * 0.15, 0, 6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(r * 0.35, -r * 0.08, r * 0.15, 0, 6.2832); ctx.fill();
+    }
+
+    // o satelite do Avesso orbita para o lado para onde o mundo puxa: e o
+    // unico enfeite do jogo que responde ao dedo em tempo real
+    if (m.sat !== undefined) {
+      ctx.beginPath();
+      ctx.arc(Math.cos(m.sat) * r * 1.34, Math.sin(m.sat) * r * 1.34, r * 0.19, 0, 6.2832);
+      ctx.fillStyle = p.cor;
+      ctx.fill();
+    }
+
     // o ponto da gravidade NAO gira nem escala: ele aponta para onde o mundo
     // puxa, e o mundo nao se mexe junto com a roupa
     ctx.beginPath();
     ctx.arc(0, gravCima ? -r * 0.5 : r * 0.5, r * 0.24, 0, 6.2832);
     ctx.fillStyle = (p.casca === 'vazado' || p.casca === 'anel') ? p.cor : fundo;
     ctx.fill();
+    // no Avesso o corpo tem as duas cores, entao o ponto precisa de um fio
+    // em volta para nao sumir dentro da metade que tem a cor dele
+    if (p.forma === 'avesso') {
+      ctx.lineWidth = r * 0.09; ctx.strokeStyle = p.cor; ctx.stroke();
+    }
 
     ctx.restore();
   }
@@ -1416,6 +1512,11 @@
     C.proximoX = C.camX + C.larg * 0.95;
     C.podeReiniciar = false;
     C.revives = 0; C.creditado = 0;
+    // O que se tinha ANTES de largar. As proezas sao conferidas a cada
+    // quadro, entao no instante da morte elas ja estao marcadas: medido com
+    // a tela de fim nao anunciando NENHUMA das roupas de proeza. Quem diz o
+    // que e novo e a foto tirada na largada.
+    C.antesDaCorrida = tidas();
     C.carga = 0; C.carregando = false; C.brilho = 0;
     el.btReviver.hidden = true;
     fila.length = 0;
@@ -1450,7 +1551,7 @@
     if (!C.poucoMov) C.tremor = 17;
 
     var m = placarAgora();
-    var antes = tidas();
+    var antes = C.antesDaCorrida || tidas();
 
     // Só o que AINDA não foi creditado. Com o reviver, a mesma corrida passa
     // por morrer() mais de uma vez; somar `m` inteiro a cada morte daria os
@@ -1466,6 +1567,9 @@
 
     var agora = tidas(), novas = [];
     for (var j = 0; j < agora.length; j++) if (antes.indexOf(agora[j]) < 0) novas.push(agora[j]);
+    // quem reviveu morre mais de uma vez na mesma corrida: o que ja foi
+    // anunciado nao se anuncia de novo
+    C.antesDaCorrida = agora;
 
     // ate onde cada desafio chegou, para a tela de fim poder dizer por
     // quanto se perdeu em vez de so marcar um ponto
@@ -1701,7 +1805,11 @@
       var p = P[i], livre = tem(p), vestida = p.id === C.vestido;
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'peca' + (livre ? '' : ' peca--trava') + (vestida ? ' peca--vestida' : '');
+      // A ultima casa e a do Avesso, e ela toma a fileira inteira: sozinha
+      // num canto a coroa do armario pareceria sobra de grade.
+      var coroa = i === P.length - 1;
+      b.className = 'peca' + (livre ? '' : ' peca--trava') +
+        (vestida ? ' peca--vestida' : '') + (coroa ? ' peca--coroa' : '');
       b.setAttribute('data-id', p.id);
       if (!livre) b.disabled = true;
 
@@ -1965,6 +2073,14 @@
       var dd = document.createElement('span');
       dd.textContent = P[j].diz || '';
       r.appendChild(dd);
+
+      // como se ganha, a mesma frase do vestiario: a lista dizia o que a
+      // roupa faz e nao dizia por onde ela vem, que e o que a pessoa precisa
+      // saber para ir atras dela
+      var pp = document.createElement('i');
+      pp.className = 'guia__por';
+      pp.textContent = comoSeGanha(P[j]);
+      r.appendChild(pp);
 
       el.ajRoupas.appendChild(r);
     }

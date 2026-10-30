@@ -91,15 +91,24 @@
       <p class="barra__trilho"><span class="barra__cheio" id="barraCheio"></span></p>
     </div>
 
-    <button class="reviver" id="btReviver" type="button" hidden>
-      <span class="reviver__cheio" id="revCheio" aria-hidden="true"></span>
-      <span class="reviver__corpo">
-        <span class="reviver__txt" id="revTxt">Segure para reviver</span>
-        <span class="reviver__custo" id="revCusto">−0 m</span>
-      </span>
-    </button>
+    <div class="fim__acoes">
+      <button class="reviver" id="btReviver" type="button" hidden>
+        <span class="reviver__corpo">
+          <span class="reviver__txt" id="revTxt">Segure para reviver</span>
+          <span class="reviver__custo" id="revCusto">−0 m</span>
+        </span>
+        <!-- a mesma frase por baixo da carga, em tinta: e ela que se le
+             quando o laranja passa por tras da letra -->
+        <span class="reviver__cheio" id="revCheio" aria-hidden="true">
+          <span class="reviver__corpo reviver__corpo--dentro">
+            <span class="reviver__txt" id="revTxt2">Segure para reviver</span>
+            <span class="reviver__custo" id="revCusto2">−0 m</span>
+          </span>
+        </span>
+      </button>
 
-    <button class="botao" id="btDeNovo" type="button">De novo</button>
+      <button class="botao botao--largo" id="btDeNovo" type="button">De novo</button>
+    </div>
     <div class="fim__pes">
       <button class="botao botao--fantasma" id="btVestiario2" type="button">Vestiário</button>
       <button class="botao botao--fantasma" id="btMenu" type="button">Menu</button>

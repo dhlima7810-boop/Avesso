@@ -1765,7 +1765,9 @@
     var pc = Math.round(C.carga * 100);
     if (pc === cargaEscrita) return;
     cargaEscrita = pc;
-    el.revCheio.style.width = pc + '%';
+    // clip-path, nao largura: a frase escura dentro da carga tem de ficar
+    // alinhada com a de cima, e so o recorte pode crescer sem mover a letra.
+    el.revCheio.style.clipPath = 'inset(0 ' + (100 - pc) + '% 0 0)';
   }
 
   function montarReviver(m) {
@@ -1774,10 +1776,16 @@
     el.btReviver.hidden = false;
     el.btReviver.className = 'reviver' + (pode ? '' : ' reviver--pobre');
     el.btReviver.disabled = !pode;
-    el.revTxt.textContent = pode ? 'Segure para reviver' : 'Metros insuficientes';
-    el.revCusto.textContent = pode
+    // a frase do travado e curta de proposito: com 'metros insuficientes' e o
+    // 'faltam' do lado a linha estourava a pilula em tela estreita
+    var frase = pode ? 'Segure para reviver' : 'Reviver';
+    var custo = pode
       ? '\u2212' + C.custoRev + ' m'
       : 'faltam ' + (C.custoRev - C.total) + ' m';
+    el.revTxt.textContent = frase;
+    el.revTxt2.textContent = frase;
+    el.revCusto.textContent = custo;
+    el.revCusto2.textContent = custo;
     C.carga = 0;
     C.carregando = false;
     escreverCarga();
@@ -2156,7 +2164,7 @@
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
       'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
       'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos', 'hudPe',
-      'btReviver', 'revCheio', 'revTxt', 'revCusto',
+      'btReviver', 'revCheio', 'revTxt', 'revCusto', 'revTxt2', 'revCusto2',
       'close', 'closeFig', 'closeNome', 'closeDiz',
       'ajuda', 'btAjuda', 'btAjudaFechar', 'ajRocada', 'ajRente', 'ajMult',
       'ajQuantas', 'ajAtos', 'ajRoupas',

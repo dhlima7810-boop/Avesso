@@ -198,6 +198,15 @@ body{
   color:rgba(237,234,227,.42);letter-spacing:.04em;
 }
 
+.fim__acoes{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  width:min(380px,88vw);
+}
+/* o piso de altura e o que garante que os dois blocos sejam do mesmo
+   tamanho: um tem uma frase, o outro duas palavras, e sem isso o reviver
+   nascia 12px mais alto que o DE NOVO */
+.fim__acoes > *{min-height:58px}
+.botao--largo{width:100%}
 .fim__pes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 
 /* ---------- rodape do menu ---------- */
@@ -354,6 +363,8 @@ kbd{
   .teclas:not(.teclas--toque){display:none}
   .teclas--toque{display:flex}
   .botao{padding:17px 38px}
+  .reviver,
+  .reviver__cheio{padding:17px 38px}
 }
 
 @media (max-width:560px){
@@ -571,17 +582,28 @@ kbd{
 .guia__teclas kbd{margin-right:3px}
 
 /* ---------- reviver ---------- */
-/* Segurar, não clicar: reviver gasta metros somados, e um clique seco faria
-   a pessoa torrar a poupança sem querer no calor da morte. A barra que
-   carrega é a confirmação. */
+/* Segurar, nao clicar: reviver gasta metros somados, e um clique seco faria
+   a pessoa torrar a poupanca sem querer no calor da morte. A barra que
+   carrega e a confirmacao.
+
+   O bloco e do mesmo tamanho do DE NOVO: os dois moram na mesma coluna
+   (.fim__acoes) e tem o mesmo recheio e o mesmo corpo de letra, senao um
+   parece o botao principal e o outro um aviso.
+
+   A frase aparece duas vezes, uma por camada: em osso na de cima e em tinta
+   dentro da carga. A camada da carga tem o mesmo inset e o mesmo recheio, e
+   por isso as duas frases caem no mesmo pixel; o que muda e o clip-path, que
+   descobre a letra escura da esquerda para a direita conforme enche. Era
+   mix-blend-mode:difference antes, e a letra saia de uma cor que nao existe
+   em lugar nenhum do jogo. */
 
 .reviver{
   appearance:none;-webkit-appearance:none;
-  position:relative;overflow:hidden;
-  width:min(320px,80vw);
+  position:relative;overflow:hidden;width:100%;
+  display:flex;align-items:center;justify-content:center;
   border:2px solid var(--laranja);border-radius:999px;
-  background:transparent;color:var(--osso);
-  padding:13px 24px;cursor:pointer;
+  background:transparent;
+  padding:15px 36px;cursor:pointer;
   font-family:var(--display);
   transition:border-color .25s var(--saida), opacity .25s var(--saida);
 }
@@ -589,21 +611,28 @@ kbd{
 .reviver:focus-visible{outline:2px solid var(--osso);outline-offset:4px}
 
 .reviver__cheio{
-  position:absolute;left:0;top:0;bottom:0;width:0;
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:15px 36px;
   background:var(--laranja);
+  clip-path:inset(0 100% 0 0);
   pointer-events:none;
 }
 .reviver__corpo{
-  position:relative;display:flex;align-items:baseline;justify-content:center;gap:.8em;
-  mix-blend-mode:difference;color:#fff;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;gap:.7em;
+  /* uma linha so: a frase quebrando em duas era o que empurrava o nome
+     para o pe do bloco */
+  white-space:nowrap;line-height:1.3;color:var(--osso);
 }
+.reviver__corpo--dentro{color:var(--tinta)}
 .reviver__txt{
-  font-weight:700;font-size:clamp(12px,1.25vw,15px);
+  font-weight:700;font-size:clamp(12px,1.4vw,17px);
   letter-spacing:.08em;text-transform:uppercase;
 }
 .reviver__custo{
-  font-size:clamp(10px,1.1vw,13px);letter-spacing:.06em;
-  font-variant-numeric:tabular-nums;opacity:.8;
+  font-size:clamp(11px,1.15vw,13px);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums;opacity:.72;
 }
 
 .reviver--pobre{border-color:var(--fio);cursor:default;opacity:.55}

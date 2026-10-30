@@ -259,6 +259,19 @@ susto da morte; a barra laranja que enche é a confirmação. Ao renascer, o
 caminho à frente é aberto — renascer em cima do obstáculo que matou seria
 piada — e um clarão cobre a tela.
 
+**O bloco é do mesmo tamanho do DE NOVO.** Os dois moram na mesma coluna
+(`.fim__acoes`), com a mesma largura, o mesmo recheio e um piso de altura
+comum: sem o piso o reviver nascia 12px mais alto, porque a frase dele é
+maior. A frase fica em **uma linha só** (`white-space:nowrap`) — quebrada em
+duas, ela escorregava para o pé da pílula e parecia saindo da borda.
+
+**A frase aparece duas vezes, uma por camada.** Em osso na de cima, em tinta
+dentro da carga; as duas camadas têm o mesmo `inset` e o mesmo recheio, então
+as letras caem no mesmo pixel, e o que cresce é o `clip-path`, que descobre a
+letra escura da esquerda para a direita. Antes era `mix-blend-mode:difference`
+numa camada só: legível, mas a letra saía de uma cor que não existe em lugar
+nenhum do jogo.
+
 **A barra anda pelo relógio, não pelo tempo de quadro.** Somar `dt` amarra a
 confirmação à velocidade de renderização: medido num navegador lento, a carga
 subia 0,51 por segundo em vez de 0,91, e segurar 1,1 s não bastava. Quanto

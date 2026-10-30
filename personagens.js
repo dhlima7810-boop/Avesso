@@ -51,12 +51,12 @@ window.AVESSO_PERSONAGENS = [
   { id:'indigo',   nome:'Vaga',       forma:'capsula',   casca:'partido', cor:'#4455c8', rastro:'bolhas', mov:'ondula',  diz:'sobe e desce em onda', por:{ tipo:'soma', m:10000 } },
   { id:'musgo',    nome:'Rolha',      forma:'capsula',   casca:'solido',  cor:'#5f8c3f', rastro:'pontos', mov:'boia',    diz:'boia, balançando devagar', por:{ tipo:'soma', m:14000 } },
   { id:'ambar',    nome:'Pião',       forma:'triangulo', casca:'solido',  cor:'#d98324', rastro:'risco',  mov:'piao',    diz:'roda rápido e bamboleia', por:{ tipo:'soma', m:19000 } },
-  { id:'vidro',    nome:'Vulto',      forma:'disco',     casca:'vazado',  cor:'#4fb3c9', rastro:'nenhum', mov:'some',    diz:'aparece e some devagar', por:{ tipo:'soma', m:25000 } },
+  { id:'duzentos', nome:'Cometa',     forma:'capsula',   casca:'solido',  cor:'#ff7a00', rastro:'risco',  mov:'risca',   diz:'estica no sentido da corrida', por:{ tipo:'soma', m:25000 } },
   { id:'polvora',  nome:'Estilhaço',  forma:'triangulo', casca:'solido',  cor:'#8a7f9e', rastro:'pontos', mov:'treme',   diz:'treme sem parar', por:{ tipo:'soma', m:32000 } },
   { id:'ferrugem', nome:'Roda',       forma:'hexagono',  casca:'anel',    cor:'#9e4a28', rastro:'bolhas', mov:'roda',    diz:'gira conforme a distância, como uma roda', por:{ tipo:'soma', m:40000 } },
   { id:'ocre',     nome:'Relógio',    forma:'disco',     casca:'anel',    cor:'#b89150', rastro:'risco',  mov:'tique',   diz:'anda de segundo em segundo', por:{ tipo:'soma', m:50000 } },
   { id:'menta',    nome:'Fole',       forma:'capsula',   casca:'partido', cor:'#3fbf8f', rastro:'pontos', mov:'infla',   diz:'infla e esvazia, como um fole', por:{ tipo:'soma', m:62000 } },
-  { id:'lilas',    nome:'Pluma',      forma:'losango',   casca:'vazado',  cor:'#9b6bd6', rastro:'risco',  mov:'flutua',  diz:'vagueia solta no ar', por:{ tipo:'soma', m:76000 } },
+  { id:'voo',      nome:'Hélice',     forma:'cruz',      casca:'solido',  cor:'#5ab6cf', rastro:'risco',  mov:'ventila', diz:'gira mais rápido quanto mais rápido se cai', por:{ tipo:'soma', m:76000 } },
   { id:'pessego',  nome:'Bumerangue', forma:'triangulo', casca:'vazado',  cor:'#e8886b', rastro:'bolhas', mov:'volta',   diz:'gira inteiro e volta de repente', por:{ tipo:'soma', m:92000 } },
 
   { id:'cem',      nome:'Bússola',    forma:'losango',   casca:'partido', cor:'#e09a28', rastro:'risco',  mov:'aponta',  diz:'aponta para onde a gravidade puxa', por:{ tipo:'proeza', id:'cem' } },
@@ -66,11 +66,11 @@ window.AVESSO_PERSONAGENS = [
   { id:'breu',     nome:'Eco',        forma:'disco',     casca:'solido',  cor:'#5a4a6e', rastro:'nenhum', mov:'repete',  diz:'deixa um fantasma atrás', por:{ tipo:'proeza', id:'tres' } },
   { id:'nespera',  nome:'Mola',       forma:'capsula',   casca:'anel',    cor:'#d9663f', rastro:'pontos', mov:'salta',   diz:'dá um tranco e volta, a cada inversão', por:{ tipo:'proeza', id:'maratona' } },
   { id:'chumbo',   nome:'Âncora',     forma:'cruz',      casca:'partido', cor:'#6b7079', rastro:'nenhum', mov:'afunda',  diz:'atrasa para o lado da queda, pesada', por:{ tipo:'proeza', id:'voo25' } },
-  { id:'voo',      nome:'Hélice',     forma:'cruz',      casca:'solido',  cor:'#5ab6cf', rastro:'risco',  mov:'ventila', diz:'gira mais rápido quanto mais rápido se cai', por:{ tipo:'proeza', id:'voo' } },
+  { id:'lilas',    nome:'Pluma',      forma:'losango',   casca:'vazado',  cor:'#9b6bd6', rastro:'risco',  mov:'flutua',  diz:'vagueia solta no ar', por:{ tipo:'proeza', id:'voo' } },
   { id:'fio',      nome:'Nó',         forma:'quadrado',  casca:'vazado',  cor:'#e03a6a', rastro:'pontos', mov:'ata',     diz:'torce para um lado e para o outro', por:{ tipo:'proeza', id:'fio' } },
   { id:'fundo',    nome:'Dado',       forma:'quadrado',  casca:'solido',  cor:'#3f7fd6', rastro:'nenhum', mov:'rolar',   diz:'vira de quarto em quarto de volta', por:{ tipo:'proeza', id:'fundo' } },
   { id:'cegas',    nome:'Espelho',    forma:'quadrado',  casca:'partido', cor:'#8f8f8f', rastro:'nenhum', mov:'reflete', diz:'se inverte de tempos em tempos', por:{ tipo:'proeza', id:'cegas' } },
   { id:'estopim',  nome:'Faísca',     forma:'losango',   casca:'solido',  cor:'#ff5a3c', rastro:'pontos', mov:'pisca',   diz:'pisca rápido', por:{ tipo:'proeza', id:'quatroMil' } },
-  { id:'duzentos', nome:'Cometa',     forma:'capsula',   casca:'solido',  cor:'#ff7a00', rastro:'risco',  mov:'risca',   diz:'estica no sentido da corrida', por:{ tipo:'proeza', id:'duzentos' } },
+  { id:'vidro',    nome:'Vulto',      forma:'disco',     casca:'vazado',  cor:'#4fb3c9', rastro:'nenhum', mov:'some',    diz:'aparece e some devagar', por:{ tipo:'proeza', id:'duzentos' } },
   { id:'limalha',  nome:'Ímã',        forma:'capsula',   casca:'anel',    cor:'#b0a08c', rastro:'pontos', mov:'atrai',   diz:'puxa para o lado da gravidade', por:{ tipo:'proeza', id:'limalha' } }
 ];

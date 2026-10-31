@@ -7,12 +7,9 @@ tela inverte junto — é daí que vem o nome.
 Abre com um duplo clique no `index.html`. Não precisa de servidor, nem de
 build, nem de internet depois do primeiro carregamento das fontes.
 
-## Por que o repositório se chama Flappy-Bird
+## Por que o repositório se chama Avesso
 
-Porque foi daí que partiu. A ideia original era refazer o Flappy Bird com
-outra cara — e no meio do caminho virou outro jogo.
-
-**Avesso não é um clone.** No Flappy Bird cada toque é um impulso; aqui não
+ No Avesso cada toque é um impulso; aqui não
 existe pulo nenhum. Segurar é aceleração contínua para cima, soltar é para
 baixo, e a tela inverte junto com a gravidade. Toques curtos encadeados
 deixam o disco flutuar no meio do campo, que é uma coisa que o original não

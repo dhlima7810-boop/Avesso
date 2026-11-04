@@ -9,12 +9,15 @@ build, nem de internet depois do primeiro carregamento das fontes.
 
 ## Por que o repositório se chama Avesso
 
- No Avesso cada toque é um impulso; aqui não
-existe pulo nenhum. Segurar é aceleração contínua para cima, soltar é para
-baixo, e a tela inverte junto com a gravidade. Toques curtos encadeados
-deixam o disco flutuar no meio do campo, que é uma coisa que o original não
-permite. O que sobrou do ponto de partida é só o formato: um botão, uma
-corrida, um número.
+Porque o jogo se chama Avesso. Ele começou como uma tentativa de refazer o
+Flappy Bird com outra cara, e no meio do caminho virou outro jogo — o
+repositório foi renomeado quando isso ficou claro.
+
+**Não é um clone.** Lá cada toque é um impulso; aqui não existe pulo nenhum:
+segurar é aceleração contínua para cima, soltar é para baixo, e a tela
+inverte junto com a gravidade. Toques curtos encadeados deixam o disco
+flutuar no meio do campo, que é uma coisa que o original não permite. O que
+sobrou do ponto de partida é só o formato: um botão, uma corrida, um número.
 
 ## Como se joga
 

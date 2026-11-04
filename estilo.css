@@ -169,6 +169,9 @@ body{
   font-variant-numeric:tabular-nums;
 }
 .numero__un{font-size:.26em;letter-spacing:0;margin-left:.2em;opacity:.55}
+/* na pausa o numero e referencia, nao manchete: quem manda ali sao os
+   desafios, e a corrida ainda nem acabou */
+.numero--pausa{font-size:clamp(40px,7vw,78px)}
 
 /* ---------- botoes ---------- */
 

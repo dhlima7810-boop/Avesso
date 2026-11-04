@@ -120,12 +120,22 @@
   // Cada funcao recebe o estado e devolve, tudo opcional:
   //   r  giro em radianos        dx, dy  deslocamento em px
   //   ex, ey  escala por eixo    a  opacidade     eco  desenha um fantasma
+  // Quanto do assentamento da ultima inversao ja passou, SEMPRE entre 0 e 1.
+  // O limite de baixo nao e enfeite: `virou` e um instante do relogio da
+  // corrida, e uma corrida nova zera esse relogio. Sem o corte, t ficava
+  // negativo, (1-t)^3 e exp(-t) cresciam sem limite, e a roupa dava voltas e
+  // inchava ate o laranja tomar a tela inteira.
+  function assento(e, seg) {
+    var t = (e.t - e.virou) / seg;
+    return t < 0 ? 0 : (t > 1 ? 1 : t);
+  }
+
   var MOVS = {
     fixo:    function ()  { return {}; },
 
     // meia volta a cada inversao, assentando em 0.25s
     vira:    function (e) {
-      var t = Math.min(1, (e.t - e.virou) / 0.25), f = 1 - Math.pow(1 - t, 3);
+      var t = assento(e, 0.25), f = 1 - Math.pow(1 - t, 3);
       var de = e.segurando ? 0 : Math.PI, ate = e.segurando ? Math.PI : 0;
       return { r: de + (ate - de) * f };
     },
@@ -163,7 +173,7 @@
     // unica coisa que esta roupa precisa fazer.
     repete:  function (e) { return { eco: 3, dy: Math.sin(e.t * 2.2) * e.raio * 0.22 }; },
     salta:   function (e) {
-      var t = Math.min(1, (e.t - e.virou) / 0.45);
+      var t = assento(e, 0.45);
       var k = Math.exp(-t * 7) * Math.cos(t * 26) * 0.3;
       return { ex: 1 - k, ey: 1 + k };
     },
@@ -182,7 +192,7 @@
     // onde a gravidade passou a puxar. Esmaga no instante da virada, que e
     // onde o movimento precisa ter peso.
     avessa:  function (e) {
-      var t = Math.min(1, (e.t - e.virou) / 0.3), f = 1 - Math.pow(1 - t, 3);
+      var t = assento(e, 0.3), f = 1 - Math.pow(1 - t, 3);
       var de = e.segurando ? 0 : Math.PI, ate = e.segurando ? Math.PI : 0;
       var k = Math.exp(-t * 6) * Math.cos(t * 19) * 0.22;
       var sde = e.segurando ? 1.5708 : -1.5708, sate = -sde;
@@ -1798,6 +1808,10 @@
     limparMundo();
     C.proximoX = C.camX + C.larg * 0.95;
     C.podeReiniciar = false;
+    // o relogio da corrida volta a zero aqui, entao o instante da ultima
+    // inversao tem de voltar junto: deixado para tras, ele fica no FUTURO
+    // em relacao ao novo relogio
+    C.virou = 0; C.segAntes = C.segurando;
     C.revives = 0; C.creditado = 0;
     // O que se tinha ANTES de largar. As proezas sao conferidas a cada
     // quadro, entao no instante da morte elas ja estao marcadas: medido com
@@ -1916,10 +1930,24 @@
     abrir(el.inicio);
   }
 
+  // A pausa mostra os desafios DA PARTIDA, do jeito da tela de fim: a barra
+  // enche ate onde a corrida chegou e a marca diz o que falta. Eles so
+  // apareciam antes de largar e depois de morrer, e no meio da corrida nao
+  // havia como lembrar o que se estava caçando sem morrer para ver.
   function pausar() {
     if (C.estado !== 'jogando') return;
     C.estado = 'pausado'; C.segurando = false;
+    var m = placarAgora(), ed = estadoDesafio(m), i, x;
+    for (i = 0; i < C.desafios.length; i++) {
+      x = C.desafios[i];
+      x.valor = Math.floor(x.d.le(ed));
+      if (x.valor > x.alvo) x.valor = x.alvo;
+      if (x.valor < 0) x.valor = 0;
+    }
+    el.pausaPlacar.textContent = m;
+    montarMetas(el.metasPausa, C.desafios, true);
     abrir(el.pausa);
+    animarMetas(el.metasPausa);
   }
 
   function despausar() {
@@ -2147,9 +2175,9 @@
 
   // As barras enchem quando a tela de fim entra, nao quando ela e montada:
   // montada ela ainda esta escondida, e a animacao passaria sem ninguem ver.
-  function animarMetas() {
+  function animarMetas(onde) {
     if (!anima) return;
-    var barras = el.metasFim.querySelectorAll('.meta__cheio');
+    var barras = (onde || el.metasFim).querySelectorAll('.meta__cheio');
     for (var i = 0; i < barras.length; i++) {
       window.gsap.fromTo(barras[i], { width: '0%' },
         { width: barras[i].getAttribute('data-ate') + '%', duration: 0.6,
@@ -2572,7 +2600,8 @@
 
   function pegar() {
     var ids = ['palco', 'tela', 'hud', 'placar', 'hudRecorde', 'hudSetor', 'mult', 'multN',
-      'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'vestiario', 'grade', 'vestLinha',
+      'aviso', 'avisoTexto', 'inicio', 'fim', 'pausa', 'pausaPlacar', 'metasPausa',
+      'vestiario', 'grade', 'vestLinha',
       'largada', 'metas', 'conta', 'metasFim', 'hudDif', 'atos', 'hudPe',
       'btReviver', 'revCheio', 'revTxt', 'revCusto', 'revTxt2', 'revCusto2',
       'close', 'closeFig', 'closeNome', 'closeDiz',

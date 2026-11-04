@@ -374,6 +374,32 @@ com `pointer-events:none` dava para clicar às cegas no armário por baixo do
 desfoque, e não havia como dispensá-lo a não ser esperando. E sair do
 vestiário o fecha, senão ele atravessa a saída e engole a tecla seguinte.
 
+### A pausa mostra os desafios
+
+`Esc` ou `P` abre a pausa, e ali estão **os três desafios da partida**, do
+mesmo jeito da tela de fim: a barra enche até onde a corrida chegou e a marca
+diz o que falta. Antes eles só apareciam **antes** de largar e **depois** de
+morrer — no meio da corrida não havia como lembrar o que se estava caçando
+sem morrer para ver. O placar aparece junto, em corpo menor que o da tela de
+fim: ali ele é referência, não manchete, porque a corrida ainda não acabou.
+
+### O instante da última inversão tem de voltar a zero
+
+`C.virou` guarda **quando** a gravidade virou pela última vez, e três roupas
+assentam o movimento a partir dele: Giro, Mola e Avesso. `comecar()` zera o
+relógio da corrida (`C.tempo`), e `virou` não voltava junto — então, na
+**segunda** corrida, ele ficava no *futuro*: `t = (tempo − virou) / 0,3` saía
+negativo, `(1 − t)³` e `exp(−t)` cresciam sem limite, e o Avesso dava voltas
+e inchava até o laranja tomar a tela inteira.
+
+Medido na versão com o defeito: **100% da tela em laranja** nos primeiros
+quadros da segunda corrida. Depois: **0,1%** — o tamanho do próprio disco.
+
+São duas correções, e as duas fazem falta: `comecar()` zera `virou` junto com
+o relógio, e o ajudante `assento()` corta o resultado entre 0 e 1, para
+nenhum outro caminho (reviver, pausa, o estado de mentira do vestiário)
+conseguir pôr `virou` à frente do relógio outra vez.
+
 ### A tela de fim diz por quanto você perdeu
 
 Cada desafio não cumprido vira uma **barra que enche até onde a corrida
